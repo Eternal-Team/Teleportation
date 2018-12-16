@@ -43,7 +43,7 @@ namespace Teleportation.UI
 
 		public override void OnInitialize()
 		{
-			Width = (0, 0.33f);
+			Width = (0, 0.25f);
 			Height = (0, 0.4f);
 			this.Center();
 			SetPadding(8);
@@ -250,14 +250,14 @@ namespace Teleportation.UI
 			buttonIcon.GetHoverText += () => $"Click with a [item:{Teleportation.Instance.ItemType<Pipette>()}] to set icon";
 			buttonIcon.OnClick += (evt, element) =>
 			{
-				//Pipette pipette = (Pipette)Main.mouseItem.modItem;
-				//if (pipette == null) return;
+				Pipette pipette = (Pipette)Main.mouseItem.modItem;
+				if (pipette == null) return;
 
-				//if (pipette.entityType != null && pipette.entityID > 0)
-				//{
-				//	teleporter.entityType = pipette.entityType;
-				//	teleporter.entityID = pipette.entityID;
-				//}
+				if (pipette.entityType != null && pipette.entityID > 0)
+				{
+					teleporter.entityType = pipette.entityType;
+					teleporter.entityID = pipette.entityID;
+				}
 			};
 			elementSettings.Append(buttonIcon);
 			#endregion

@@ -57,6 +57,8 @@
     <Compile Include="Tiles\Teleporter.cs" />
     <Compile Include="UI\TeleporterPanel.cs" />
     <Compile Include="UI\TeleporterUI.cs" />
+    <Compile Include="UI\UIFuelBar.cs" />
+    <Compile Include="UI\UIIcon.cs" />
     <Compile Include="UI\UITeleporterItem.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -44,7 +44,7 @@ namespace Teleportation.Items
 			item.useStyle = 1;
 			item.useTime = 15;
 			item.useAnimation = 15;
-			item.rare = ItemRarityID.Lime;
+			item.rare = ItemRarityID.White;
 		}
 
 		public override bool UseItem(Player player)

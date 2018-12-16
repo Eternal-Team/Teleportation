@@ -1,24 +1,30 @@
-﻿using System;
-using BaseLibrary.UI.Elements;
+﻿using BaseLibrary.UI.Elements;
 using BaseLibrary.Utility;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Teleportation.Items;
 using Teleportation.TileEntities;
 using Terraria;
 using Terraria.UI;
 
 namespace Teleportation.UI
 {
-	public class UITeleporterItem : UIGridElement<UITeleporterItem>
+	public class UITeleporterItem : UIPanel, IGridElement<UITeleporterItem>
 	{
 		public TETeleporter teleporter;
 		public bool Selected;
+
+		public UIGrid<UITeleporterItem> Grid { get; set; }
 
 		public UITeleporterItem(TETeleporter teleporter)
 		{
 			this.teleporter = teleporter;
 			SetPadding(8);
+
+			UIIcon icon = new UIIcon(teleporter)
+			{
+				Height = (0, 1),
+				SubstituteWidth = true
+			};
+			Append(icon);
 
 			UIText textDisplayName = new UIText(teleporter.DisplayName.Value)
 			{
@@ -39,32 +45,22 @@ namespace Teleportation.UI
 		{
 			if (evt.Target != this) return;
 
-			grid.items.ForEach(item => item.Selected = false);
+			Grid.items.ForEach(item => item.Selected = false);
 			Selected = true;
 		}
 
-		protected override void DrawSelf(SpriteBatch spriteBatch)
+		public override void MouseOver(UIMouseEvent evt)
 		{
-			CalculatedStyle dimensions = GetDimensions();
-			CalculatedStyle innerDimensions = GetInnerDimensions();
+			base.MouseOver(evt);
 
-			spriteBatch.DrawPanel(dimensions, IsMouseHovering ? Utility.ColorPanel_Hovered : Selected ? Utility.ColorPanel_Selected : Utility.ColorPanel);
+			BackgroundColor = Utility.ColorPanel_Hovered;
+		}
 
-			CalculatedStyle iconDimensions = new CalculatedStyle(innerDimensions.X, innerDimensions.Y, innerDimensions.Height, innerDimensions.Height);
-			spriteBatch.DrawPanel(iconDimensions);
+		public override void MouseOut(UIMouseEvent evt)
+		{
+			base.MouseOut(evt);
 
-			Texture2D texture = Main.itemTexture[Teleportation.Instance.ItemType<Teleporter>()];
-			spriteBatch.Draw(texture, iconDimensions.Center(), null, Color.White, 0f, texture.Size() * 0.5f, Math.Min((iconDimensions.Width - 10f) / texture.Width, (iconDimensions.Height - 10f) / texture.Height), SpriteEffects.None, 0f);
-
-			//ChatManager.DrawColorCodedStringWithShadow(spriteBatch, Main.fontMouseText, teleporter.DisplayName.Value, new Vector2(innerDimensions.X + innerDimensions.Height + 8, innerDimensions.Y), Color.White, 0f, Vector2.Zero, Vector2.One);
-
-			//if (entity != null)
-			//{
-			//	typeof(Utility).InvokeMethod<object>("Draw" + teleporter.entityType, new[] { spriteBatch, entity, new Vector2(dimensions.X + 16f, dimensions.Y + 16f), new Vector2(dimensions.Height - 32f) });
-
-			//	Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, teleporter.name, dimensions.X + dimensions.Height, dimensions.Y + 8f, Color.White, Color.Black, Vector2.Zero);
-			//	Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, $"Position: {teleporter.Position.X}; {teleporter.Position.Y}", dimensions.X + dimensions.Height, dimensions.Y + dimensions.Height - 28f, Color.White, Color.Black, Vector2.Zero);
-			//}
+			BackgroundColor = Selected ? Utility.ColorPanel_Selected : Utility.ColorPanel;
 		}
 	}
 }

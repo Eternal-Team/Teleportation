@@ -28,9 +28,11 @@ namespace Teleportation.TileEntities
 
 		public ItemHandler Handler;
 		public Ref<string> DisplayName = new Ref<string>("Teleporter");
-		public bool[] Whitelist = new bool[4];
+		public bool[] Whitelist = { true, false, false, false };
 		public TETeleporter destination;
 		public bool dialOnce;
+		public string entityType = "Item";
+		public int entityID = -1;
 
 		public TETeleporter()
 		{
@@ -38,26 +40,9 @@ namespace Teleportation.TileEntities
 			Handler.OnContentsChanged += slot => { };
 		}
 
-		#region Data
-		public string entityType = "Item";
-		public int entityID = -1;
-		#endregion
-
-		public void TeleportPlayer()
+		public override void OnPlace()
 		{
-			//	if (teleporter.destinationTeleporter != Point16.NegativeOne && Main.LocalPlayer.getRect().Intersects(teleporter.Hitbox) && !teleporter.fuel.IsAir)
-			//	{
-			//		Main.LocalPlayer.Teleport(new Vector2(teleporter.destinationTeleporter.X * 16 + 24 - Main.LocalPlayer.width * 0.5f, teleporter.destinationTeleporter.Y * 16 - Main.LocalPlayer.height), 2);
-			//		Main.LocalPlayer.GetModPlayer<TPlayer>().teleportedTimer = 60;
-
-			//		teleporter.fuel.stack--;
-			//		if (teleporter.fuel.stack <= 0) teleporter.fuel.TurnToAir();
-
-			//		teleporter.Sync();
-
-			//		teleporter.CloseUI();
-			//		Main.PlaySound(SoundID.DD2_EtherianPortalSpawnEnemy);
-			//	}
+			entityID = Teleportation.Instance.ItemType<Items.Teleporter>();
 		}
 
 		public override void Update()
@@ -68,14 +53,59 @@ namespace Teleportation.TileEntities
 
 			if (Whitelist[0])
 			{
-				List<Player> players = Main.player.Where(player => Hitbox.Contains(player.getRect())).ToList();
+				List<Player> players = Main.player.Where(player => player.getRect().Intersects(Hitbox)).ToList();
 
 				if (players.Any())
 				{
 					foreach (Player player in players)
 					{
-						player.Teleport(destination.Position.ToWorldCoordinates() + new Vector2(24 - player.width * 0.5f, -player.height));
+						player.Teleport(destination.Position.ToWorldCoordinates(0, 0) + new Vector2(24 - player.width * 0.5f, -player.height));
 						NetMessage.SendData(MessageID.Teleport, -1, -1, null, 0, player.whoAmI, player.position.X, player.position.Y);
+					}
+
+					teleported = true;
+				}
+			}
+
+			if (Whitelist[1])
+			{
+				List<NPC> npcs = Main.npc.Where(npc => npc.getRect().Intersects(Hitbox)).ToList();
+
+				if (npcs.Any())
+				{
+					foreach (NPC npc in npcs) npc.Teleport(destination.Position.ToWorldCoordinates(0, 0) + new Vector2(24 - npc.width * 0.5f, -npc.height));
+
+					teleported = true;
+				}
+			}
+
+
+			if (Whitelist[2])
+			{
+				List<Item> items = Main.item.Where(item => item.getRect().Intersects(Hitbox)).ToList();
+
+				if (items.Any())
+				{
+					foreach (Item item in items)
+					{
+						item.position = destination.Position.ToWorldCoordinates(0, 0) + new Vector2(24 - item.width * 0.5f, -item.height);
+						NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI);
+					}
+
+					teleported = true;
+				}
+			}
+
+			if (Whitelist[3])
+			{
+				List<Projectile> projectiles = Main.projectile.Where(projectile => projectile.getRect().Intersects(Hitbox)).ToList();
+
+				if (projectiles.Any())
+				{
+					foreach (Projectile projectile in projectiles)
+					{
+						projectile.position = destination.Position.ToWorldCoordinates(0, 0) + new Vector2(24 - projectile.width * 0.5f, -projectile.height);
+						NetMessage.SendData(MessageID.SyncProjectile, -1, -1, null, projectile.whoAmI);
 					}
 
 					teleported = true;
@@ -87,34 +117,15 @@ namespace Teleportation.TileEntities
 				destination = null;
 				dialOnce = false;
 			}
-
-			//if (teleporting && destinationTeleporter != Point16.NegativeOne && !fuel.IsAir)
-			//{
-
-			//	if (whitelist[1])
-			//		foreach (Item item in Main.item.Where(x => x.getRect().Intersects(Hitbox)))
-			//		{
-			//			item.position = new Vector2(destinationTeleporter.X * 16 + 24 - item.width * 0.5f, destinationTeleporter.Y * 16 - 24 - item.height);
-			//			NetMessage.SendData(MessageID.SyncItem, -1, -1, null, Main.item.ToList().IndexOf(item));
-			//		}
-
-			//	if (whitelist[2])
-			//		foreach (NPC npc in Main.npc.Where(x => x.getRect().Intersects(Hitbox)))
-			//			npc.Teleport(new Vector2(destinationTeleporter.X * 16 + 24 - npc.width * 0.5f, destinationTeleporter.Y * 16 - npc.height));
-			//	if (whitelist[3])
-			//		foreach (Projectile projectile in Main.projectile.Where(x => x.getRect().Intersects(Hitbox)))
-			//		{
-			//			projectile.position = new Vector2(destinationTeleporter.X * 16 + 24 - projectile.width * 0.5f, destinationTeleporter.Y * 16 - 24 - projectile.height);
-			//			NetMessage.SendData(MessageID.SyncProjectile, -1, -1, null, Main.projectile.ToList().IndexOf(projectile));
-			//		}
-			//}
 		}
 
 		public override TagCompound Save() => new TagCompound
 		{
 			["DisplayName"] = DisplayName.Value,
 			["Whitelist"] = Whitelist.ToList(),
-			["Destination"] = destination?.Position ?? Point16.NegativeOne
+			["Destination"] = destination?.Position ?? Point16.NegativeOne,
+			["EntityType"] = entityType,
+			["EntityID"] = entityID
 		};
 
 		public override void Load(TagCompound tag)
@@ -122,7 +133,10 @@ namespace Teleportation.TileEntities
 			DisplayName.Value = tag.GetString("DisplayName");
 			Whitelist = tag.GetList<bool>("Whitelist").ToArray();
 			Point16 pos = tag.Get<Point16>("Destination");
-			destination = pos != Point16.NegativeOne ? (TETeleporter)ByPosition[pos] : null;
+			destination = pos != Point16.NegativeOne && ByPosition.ContainsKey(pos) ? (TETeleporter)ByPosition[pos] : null;
+			entityType = tag.GetString("EntityType");
+			int entityId = tag.GetInt("EntityID");
+			entityID = entityId > 0 ? entityId : Teleportation.Instance.ItemType<Items.Teleporter>();
 		}
 
 		public override void OnKill() => Handler.DropItems(new Rectangle(Position.X * 16, Position.Y * 16, 48, 16));
