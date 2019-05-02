@@ -1,6 +1,4 @@
 ﻿using BaseLibrary.Items;
-using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace Teleportation.Items
 {
@@ -26,17 +24,6 @@ namespace Teleportation.Items
 			item.useStyle = 1;
 			item.consumable = true;
 			item.createTile = mod.TileType<Tiles.Teleporter>();
-		}
-
-		public override void AddRecipes()
-		{
-			ModRecipe recipe = new ModRecipe(mod);
-			recipe.AddIngredient(ItemID.HallowedBar, 10);
-			recipe.AddIngredient(ItemID.Wire, 50);
-			//recipe.AddRecipeGroup(Teleportation.mechSouls.GetText.Invoke(), 2);
-			recipe.AddTile(TileID.MythrilAnvil);
-			recipe.SetResult(this);
-			recipe.AddRecipe();
 		}
 	}
 }

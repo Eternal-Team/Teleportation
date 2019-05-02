@@ -1,5 +1,5 @@
 ﻿using BaseLibrary.Tiles;
-using BaseLibrary.Utility;
+using BaseLibrary;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.TileEntities;
@@ -15,11 +15,8 @@ namespace Teleportation.Tiles
 	{
 		public override string Texture => "Teleportation/Textures/Tiles/Teleporter";
 
-		[PathOverride("Teleportation/Textures/TeleporterEffect")]
-		public static Texture2D TeleporterEffect { get; set; }
-
-		[PathOverride("Teleportation/Textures/TeleporterGlow")]
-		public static Texture2D TeleporterGlow { get; set; }
+		public static Texture2D TeleporterEffect;
+		public static Texture2D TeleporterGlow;
 
 		public override void SetDefaults()
 		{
@@ -49,6 +46,8 @@ namespace Teleportation.Tiles
 
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)
 		{
+			if (TeleporterEffect == null) TeleporterEffect = ModContent.GetTexture("Teleportation/Textures/TeleporterEffect");
+
 			TETeleporter teleporter = mod.GetTileEntity<TETeleporter>(i, j);
 			if (teleporter == null || !Main.tile[i, j].IsTopLeft() || teleporter.destination == null) return true;
 
@@ -68,6 +67,8 @@ namespace Teleportation.Tiles
 
 		public override void SpecialDraw(int i, int j, SpriteBatch spriteBatch)
 		{
+			if (TeleporterGlow == null) TeleporterGlow = ModContent.GetTexture("Teleportation/Textures/TeleporterGlow");
+
 			TETeleporter teleporter = mod.GetTileEntity<TETeleporter>(i, j);
 			if (teleporter == null || !Main.tile[i, j].IsTopLeft()) return;
 
@@ -78,14 +79,16 @@ namespace Teleportation.Tiles
 
 		public override void RightClick(int i, int j)
 		{
-			TETeleporter qeChest = mod.GetTileEntity<TETeleporter>(i, j);
-			Teleportation.Instance.TeleporterUI.UI.HandleUI(qeChest);
+			TETeleporter teleporter = mod.GetTileEntity<TETeleporter>(i, j);
+
+			BaseLibrary.BaseLibrary.PanelGUI.UI.HandleUI(teleporter);
 		}
 
-		public override void KillMultiTile(int i, int j, int frameX, int frameY)
+        public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
-			TETeleporter qeChest = mod.GetTileEntity<TETeleporter>(i, j);
-			Teleportation.Instance.TeleporterUI.UI.CloseUI(qeChest);
+			TETeleporter teleporter = mod.GetTileEntity<TETeleporter>(i, j);
+
+			BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(teleporter);
 
 			Item.NewItem(i * 16, j * 16, 48, 16, mod.ItemType<Items.Teleporter>());
 			mod.GetTileEntity<TETeleporter>().Kill(i, j);

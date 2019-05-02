@@ -1,8 +1,8 @@
-﻿using BaseLibrary.UI.Elements;
-using BaseLibrary.Utility;
+﻿using BaseLibrary;
+using BaseLibrary.UI.Elements;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.TileEntities;
-using Terraria.UI;
+using Terraria;
 
 namespace Teleportation.UI
 {
@@ -18,24 +18,11 @@ namespace Teleportation.UI
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
-			CalculatedStyle dimensions = GetDimensions();
+			spriteBatch.DrawPanel(Dimensions);
 
-			spriteBatch.DrawPanel(dimensions);
+			if (teleporter.entity == null) return;
 
-			if (teleporter.entityID < 1) return;
-
-			switch (teleporter.entityType)
-			{
-				case "Item":
-					spriteBatch.DrawItem(BaseLibrary.BaseLibrary.itemCache[teleporter.entityID], dimensions.Center(), GetInnerDimensions().Size());
-					break;
-				case "NPC":
-					spriteBatch.DrawNPC(BaseLibrary.BaseLibrary.npcCache[teleporter.entityID], dimensions.Center(), GetInnerDimensions().Size());
-					break;
-				case "Projectile":
-					spriteBatch.DrawProjectile(BaseLibrary.BaseLibrary.projectileCache[teleporter.entityID], dimensions.Center(), GetInnerDimensions().Size());
-					break;
-			}
+			Main.spriteBatch.DrawEntity(teleporter.entity, Dimensions.Center(), InnerDimensions.Size());
 		}
 	}
 }

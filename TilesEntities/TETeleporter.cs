@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BaseLibrary.Tiles.TileEntites;
+using BaseLibrary.UI;
 using ContainerLibrary;
 using Microsoft.Xna.Framework;
 using Teleportation.Tiles;
@@ -14,35 +15,51 @@ using Terraria.ModLoader.IO;
 
 namespace Teleportation.TileEntities
 {
-	public class TETeleporter : BaseTE
+	public class TETeleporter : BaseTE, IHasUI, IItemHandler
 	{
 		public override Type TileType => typeof(Teleporter);
 
-		public Rectangle Hitbox => new Rectangle(Position.X * 16, Position.Y * 16 - 48, 48, 48);
+		private Rectangle Hitbox => new Rectangle(Position.X * 16 + 8, Position.Y * 16 - 8, 32, 8);
 
-		public TeleporterPanel UI => Teleportation.Instance.TeleporterUI.UI.OfType<TeleporterPanel>().FirstOrDefault(x => x.teleporter.ID == ID);
-		public Vector2? UIPosition;
+		public LegacySoundStyle CloseSound => SoundID.Item1;
 
-		public static LegacySoundStyle OpenSound => SoundID.Item1;
-		public static LegacySoundStyle CloseSound => SoundID.Item1;
+		public LegacySoundStyle OpenSound => SoundID.Item1;
 
-		public ItemHandler Handler;
-		public Ref<string> DisplayName = new Ref<string>("Teleporter");
+		public new Guid ID { get; set; }
+
+		public BaseUIPanel UI { get; set; }
+
+		public ItemHandler Handler { get; }
+
 		public bool[] Whitelist = { true, false, false, false };
-		public TETeleporter destination;
 		public bool dialOnce;
-		public string entityType = "Item";
-		public int entityID = -1;
+
+		public Ref<string> DisplayName = new Ref<string>("Teleporter");
+		public TileEntity destination;
+
+		public Entity entity;
 
 		public TETeleporter()
 		{
-			Handler = new ItemHandler(1);
+			ID = Guid.NewGuid();
+
+			Handler = new ItemHandler();
 			Handler.OnContentsChanged += slot => { };
+			Handler.IsItemValid += (slot, item) => item.type == mod.ItemType<FuelCell>();
 		}
 
 		public override void OnPlace()
 		{
-			entityID = Teleportation.Instance.ItemType<Items.Teleporter>();
+			entity = new Item();
+			((Item)entity).SetDefaults(Teleportation.Instance.ItemType<Items.Teleporter>());
+
+			if (Main.netMode != NetmodeID.Server)
+			{
+				foreach (TeleporterPanel teleporterPanel in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements.OfType<TeleporterPanel>())
+				{
+					teleporterPanel.PopulateGrid();
+				}
+			}
 		}
 
 		public override void Update()
@@ -61,6 +78,8 @@ namespace Teleportation.TileEntities
 					{
 						player.Teleport(destination.Position.ToWorldCoordinates(0, 0) + new Vector2(24 - player.width * 0.5f, -player.height));
 						NetMessage.SendData(MessageID.Teleport, -1, -1, null, 0, player.whoAmI, player.position.X, player.position.Y);
+
+						if (player == Main.LocalPlayer && UI != null) BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(this);
 					}
 
 					teleported = true;
@@ -124,19 +143,19 @@ namespace Teleportation.TileEntities
 			["DisplayName"] = DisplayName.Value,
 			["Whitelist"] = Whitelist.ToList(),
 			["Destination"] = destination?.Position ?? Point16.NegativeOne,
-			["EntityType"] = entityType,
-			["EntityID"] = entityID
+			["ID"] = ID.ToString(),
+			["Items"] = Handler.Save()
 		};
 
 		public override void Load(TagCompound tag)
 		{
 			DisplayName.Value = tag.GetString("DisplayName");
 			Whitelist = tag.GetList<bool>("Whitelist").ToArray();
-			Point16 pos = tag.Get<Point16>("Destination");
-			destination = pos != Point16.NegativeOne && ByPosition.ContainsKey(pos) ? (TETeleporter)ByPosition[pos] : null;
-			entityType = tag.GetString("EntityType");
-			int entityId = tag.GetInt("EntityID");
-			entityID = entityId > 0 ? entityId : Teleportation.Instance.ItemType<Items.Teleporter>();
+
+			ByPosition.TryGetValue(tag.Get<Point16>("Destination"), out destination);
+
+			ID = Guid.Parse(tag.GetString("ID"));
+			Handler.Load(tag.GetCompound("Items"));
 		}
 
 		public override void OnKill() => Handler.DropItems(new Rectangle(Position.X * 16, Position.Y * 16, 48, 16));
