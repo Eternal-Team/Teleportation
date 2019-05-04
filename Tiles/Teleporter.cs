@@ -1,5 +1,5 @@
-﻿using BaseLibrary.Tiles;
-using BaseLibrary;
+﻿using BaseLibrary;
+using BaseLibrary.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.TileEntities;
@@ -49,7 +49,7 @@ namespace Teleportation.Tiles
 			if (TeleporterEffect == null) TeleporterEffect = ModContent.GetTexture("Teleportation/Textures/TeleporterEffect");
 
 			TETeleporter teleporter = mod.GetTileEntity<TETeleporter>(i, j);
-			if (teleporter == null || !Main.tile[i, j].IsTopLeft() || teleporter.destination == null) return true;
+			if (teleporter == null || !Main.tile[i, j].IsTopLeft() || teleporter.Destination == null) return true;
 
 			Vector2 position = new Point16(i + 1, j).ToScreenCoordinates();
 
@@ -84,7 +84,7 @@ namespace Teleportation.Tiles
 			BaseLibrary.BaseLibrary.PanelGUI.UI.HandleUI(teleporter);
 		}
 
-        public override void KillMultiTile(int i, int j, int frameX, int frameY)
+		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
 			TETeleporter teleporter = mod.GetTileEntity<TETeleporter>(i, j);
 

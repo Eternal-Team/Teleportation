@@ -7,6 +7,7 @@ using Teleportation.Items;
 using Teleportation.TileEntities;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace Teleportation.UI
@@ -166,12 +167,11 @@ namespace Teleportation.UI
 					};
 					elementSettings.Append(textIcon);
 
-					UIButton buttonIcon = new UIButton(Main.itemTexture[Teleportation.Instance.ItemType<Teleporter>()], ScaleMode.Zoom)
+					UIIcon buttonIcon = new UIIcon(Container)
 					{
 						Size = new Vector2(40),
 						Top = (112, 0),
-						Padding = (6, 6, 6, 6),
-						RenderPanel = true
+						Padding = (6, 6, 6, 6)
 					};
 					buttonIcon.GetHoverText += () => $"Click with a [item:{Teleportation.Instance.ItemType<Pipette>()}] to set icon";
 					buttonIcon.OnClick += (evt, element) =>
@@ -179,11 +179,10 @@ namespace Teleportation.UI
 						Pipette pipette = (Pipette)Main.mouseItem.modItem;
 						if (pipette == null) return;
 
-						//if (pipette.EntityType != null && pipette.EntityID > 0)
-						//{
-      //                      Container.entityType = pipette.EntityType;
-      //                      Container.entityID = pipette.EntityID;
-      //                  }
+						if (pipette.EntityTexture != null) Container.EntityTexture = pipette.EntityTexture;
+						Container.EntityAnimation = pipette.EntityAnimation != null ? new DrawAnimationVertical(pipette.EntityAnimation.TicksPerFrame, pipette.EntityAnimation.FrameCount) : null;
+
+						Main.PlaySound(SoundID.MenuTick);
 					};
 					elementSettings.Append(buttonIcon);
 				}
@@ -199,7 +198,7 @@ namespace Teleportation.UI
 				};
 				buttonDialOnce.OnClick += (evt, element) =>
 				{
-					Container.destination = gridLocations.items.FirstOrDefault(item => item.Selected)?.teleporter;
+					Container.Destination = gridLocations.items.FirstOrDefault(item => item.Selected)?.teleporter;
 					Container.dialOnce = true;
 				};
 				elementMain.Append(buttonDialOnce);
@@ -213,7 +212,7 @@ namespace Teleportation.UI
 				};
 				buttonDial.OnClick += (evt, element) =>
 				{
-					Container.destination = gridLocations.items.FirstOrDefault(item => item.Selected)?.teleporter;
+					Container.Destination = gridLocations.items.FirstOrDefault(item => item.Selected)?.teleporter;
 					Container.dialOnce = false;
 				};
 				elementMain.Append(buttonDial);
@@ -227,7 +226,7 @@ namespace Teleportation.UI
 				};
 				buttonInterrupt.OnClick += (evt, element) =>
 				{
-					Container.destination = null;
+					Container.Destination = null;
 					gridLocations.items.ForEach(item => item.Selected = false);
 					Container.dialOnce = false;
 				};
@@ -245,7 +244,7 @@ namespace Teleportation.UI
 				{
 					Width = (0, 1),
 					Height = (60, 0),
-					Selected = Container.destination == teleporter
+					Selected = Container.Destination == teleporter
 				};
 				gridLocations.Add(teleporterItem);
 			}

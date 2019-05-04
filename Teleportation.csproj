@@ -59,6 +59,9 @@
       <Name>ContainerLibrary</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>"C:\Program Files (x86)\Steam\steamapps\common\Terraria\TerrariaServer.exe" -build "$(ProjectDir)\" -eac "$(TargetPath)"</PostBuildEvent>

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using BaseLibrary;
 using BaseLibrary.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,16 +17,14 @@ namespace Teleportation.Items
 
 		public override bool CloneNewInstances => true;
 
-		//public Type EntityType;
-		//public int EntityID = -1;
-
 		public Texture2D EntityTexture;
+		public DrawAnimation EntityAnimation;
 
 		public override ModItem Clone()
 		{
 			Pipette clone = (Pipette)base.Clone();
-			//clone.EntityType = EntityType;
-			//clone.EntityID = EntityID;
+			clone.EntityTexture = EntityTexture;
+			clone.EntityAnimation = EntityAnimation;
 			return clone;
 		}
 
@@ -52,69 +50,48 @@ namespace Teleportation.Items
 
 		public override bool UseItem(Player player)
 		{
-			Point mouse = Main.MouseWorld.ToPoint();
-
-			Entity entity = Main.item.FirstOrDefault(e => e.Hitbox.Contains(mouse)) ?? (Entity)Main.npc.FirstOrDefault(e => e.Hitbox.Contains(mouse)) ?? Main.projectile.FirstOrDefault(e => e.Hitbox.Contains(mouse));
+			Entity entity = Main.MouseWorld.GetEntityAtPos();
 			if (entity == null) return false;
 
-			if (entity is Item i)
+			if (entity is Item item)
 			{
-				//EntityTexture = i.GetTexture();
-				EntityTexture = Main.itemTexture[i.type];
-				using (FileStream stream = new FileStream($"{ModLoader.ModPath}/test.png", FileMode.Create))
-				{
-					EntityTexture.SaveAsPng(stream, EntityTexture.Width, EntityTexture.Height);
-
-					using (BinaryWriter writer = new BinaryWriter(stream))
-					{
-						if (Main.itemAnimations[i.type] != null)
-						{
-							DrawAnimation animation = Main.itemAnimations[i.type];
-							writer.Write(animation.TicksPerFrame);
-							writer.Write(animation.FrameCount);
-						}
-					}
-				}
-
-				using (FileStream stream = new FileStream($"{ModLoader.ModPath}/test.png", FileMode.Open))
-				{
-					EntityTexture = Texture2D.FromStream(Main.graphics.GraphicsDevice, stream);
-					stream.Position += 4;
-					using (BinaryReader reader = new BinaryReader(stream))
-					{
-						if (reader.PeekChar() != -1)
-						{
-							DrawAnimationVertical animation = new DrawAnimationVertical(reader.ReadInt32(), reader.ReadInt32());
-							Main.NewText(animation.TicksPerFrame + " : " + animation.FrameCount);
-						}
-					}
-				}
+				EntityTexture = Main.itemTexture[item.type];
+				EntityAnimation = Main.itemAnimations[item.type];
 			}
-
-			//EntityType = entity.GetType();
-			//EntityID = entity.GetValue<int>("type");
+			else if (entity is NPC npc)
+			{
+				EntityTexture = Main.npcTexture[npc.type];
+				EntityAnimation = new DrawAnimationVertical(5, Main.npcFrameCount[npc.type]);
+			}
+			else if (entity is Projectile projectile)
+			{
+				EntityTexture = Main.projectileTexture[projectile.type];
+				EntityAnimation = new DrawAnimationVertical(5, Main.projFrames[projectile.type]);
+			}
 
 			return true;
 		}
 
 		public override void ModifyTooltips(List<TooltipLine> tooltips)
 		{
-			//if (EntityType != null) tooltips.Add(new TooltipLine(mod, "PipetteInfo", ""));
+			if (EntityTexture != null) tooltips.Add(new TooltipLine(mod, "PipetteInfo", ""));
 		}
 
 		public override bool PreDrawTooltipLine(DrawableTooltipLine line, ref int yOffset)
 		{
-			//if (line.Name == "PipetteInfo" && EntityType != null)
-			//{
-			//	Main.spriteBatch.DrawPanel(new Rectangle(line.X, line.Y, 56, 56));
+			if (line.Name == "PipetteInfo")
+			{
+				Main.spriteBatch.DrawPanel(new Rectangle(line.X, line.Y, 56, 56));
 
-			//	Entity entity = (Entity)Activator.CreateInstance(EntityType);
-			//	entity.InvokeMethod<object>("SetDefaults", EntityID);
+				Main.spriteBatch.Draw(Utility.PointClampState, () =>
+				{
+					EntityAnimation?.Update();
+					Rectangle rectangle = EntityAnimation?.GetFrame(EntityTexture) ?? EntityTexture.Frame();
+					Main.spriteBatch.Draw(EntityTexture, new Vector2(line.X + 28, line.Y + 28), rectangle, Color.White, 0f, rectangle.Size() * 0.5f, Math.Min(40f / rectangle.Width, 40f / rectangle.Height), SpriteEffects.None, 0f);
+				});
 
-			//	Main.spriteBatch.DrawEntity(entity, new Vector2(line.X + 28, line.Y + 28), new Vector2(40));
-
-			//	return false;
-			//}
+				return false;
+			}
 
 			return base.PreDrawTooltipLine(line, ref yOffset);
 		}

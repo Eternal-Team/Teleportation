@@ -1,5 +1,5 @@
-﻿using BaseLibrary.UI.Elements;
-using BaseLibrary;
+﻿using BaseLibrary;
+using BaseLibrary.UI.Elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.TileEntities;
@@ -40,18 +40,18 @@ namespace Teleportation.UI
 			buttomShowOnMap.GetHoverText += () => "Show on map";
 			Append(buttomShowOnMap);
 		}
-		
-        public override void Click(UIMouseEvent evt)
+
+		public override void Click(UIMouseEvent evt)
 		{
 			if (evt.Target != this) return;
 
-			Grid.items.ForEach(item => item.Selected = false); 
-            Selected = true;
+			Grid.items.ForEach(item => item.Selected = false);
+			Selected = true;
 		}
 
-        public override void PreDraw(SpriteBatch spriteBatch)
+		public override void PreDraw(SpriteBatch spriteBatch)
 		{
-			BackgroundColor = IsMouseHovering ? Utility.ColorPanel_Hovered : (Selected ? Utility.ColorPanel_Selected : Utility.ColorPanel);
+			BackgroundColor = IsMouseHovering ? Utility.ColorPanel_Hovered : Selected ? Utility.ColorPanel_Selected : Utility.ColorPanel;
 		}
 	}
 }

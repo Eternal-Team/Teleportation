@@ -8,15 +8,15 @@ namespace Teleportation.Tiles
 	public class FuelCell : BaseItem
 	{
 		public override string Texture => "Teleportation/Textures/Items/FuelCell";
-		
-        public override void SetStaticDefaults()
+
+		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Fuel Cell");
 
 			Main.RegisterItemAnimation(item.type, new DrawAnimationVertical(5, 5));
 		}
 
-        public override void SetDefaults()
+		public override void SetDefaults()
 		{
 			item.width = 20;
 			item.height = 20;

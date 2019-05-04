@@ -1,4 +1,8 @@
-﻿using BaseLibrary;
+﻿using System.Linq;
+using BaseLibrary;
+using Microsoft.Xna.Framework;
+using Teleportation.TileEntities;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 
 namespace Teleportation
@@ -13,5 +17,13 @@ namespace Teleportation
 		}
 
 		public override void Unload() => Utility.UnloadNullableTypes();
+
+		public override void UpdateUI(GameTime gameTime)
+		{
+			foreach (TETeleporter teleporter in TileEntity.ByID.Values.OfType<TETeleporter>())
+			{
+				teleporter.EntityAnimation?.Update();
+			}
+		}
 	}
 }

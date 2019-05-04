@@ -1,14 +1,19 @@
-﻿using BaseLibrary;
+﻿using System;
+using BaseLibrary;
 using BaseLibrary.UI.Elements;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.TileEntities;
 using Terraria;
+using Terraria.DataStructures;
 
 namespace Teleportation.UI
 {
 	public class UIIcon : BaseElement
 	{
 		private TETeleporter teleporter;
+		private Texture2D Texture => teleporter.EntityTexture;
+		private DrawAnimation Animation => teleporter.EntityAnimation;
 
 		public UIIcon(TETeleporter teleporter)
 		{
@@ -20,9 +25,14 @@ namespace Teleportation.UI
 		{
 			spriteBatch.DrawPanel(Dimensions);
 
-			if (teleporter.entity == null) return;
+			if (Texture == null) return;
 
-			Main.spriteBatch.DrawEntity(teleporter.entity, Dimensions.Center(), InnerDimensions.Size());
+			// different state?
+			spriteBatch.Draw(Utility.PointClampState, () =>
+			{
+				Rectangle rectangle = Animation?.GetFrame(Texture) ?? Texture.Frame();
+				spriteBatch.Draw(Texture, Dimensions.Center(), rectangle, Color.White, 0f, rectangle.Size() * 0.5f, Math.Min(InnerDimensions.Width / rectangle.Width, InnerDimensions.Height / rectangle.Height), SpriteEffects.None, 0f);
+			});
 		}
 	}
 }
