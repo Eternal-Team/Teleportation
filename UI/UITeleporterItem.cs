@@ -4,20 +4,28 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.TileEntities;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.UI;
 
 namespace Teleportation.UI
 {
 	public class UITeleporterItem : UIPanel, IGridElement<UITeleporterItem>
 	{
-		public Teleporter teleporter;
+		private Teleporter teleporter;
+
+		private TeleporterPanel panel;
+
 		public bool Selected;
 
 		public UIGrid<UITeleporterItem> Grid { get; set; }
 
-		public UITeleporterItem(Teleporter teleporter)
+		private UIButton buttomShowOnMap;
+
+		public UITeleporterItem(Teleporter teleporter, TeleporterPanel panel)
 		{
+			this.panel = panel;
 			this.teleporter = teleporter;
+			Selected = teleporter.Position == panel.SelectedDestination;
 
 			UIIcon icon = new UIIcon(teleporter)
 			{
@@ -32,7 +40,7 @@ namespace Teleportation.UI
 			};
 			Append(textDisplayName);
 
-			UIButton buttomShowOnMap = new UIButton(Main.mapIconTexture[0])
+			buttomShowOnMap = new UIButton(Main.mapIconTexture[0])
 			{
 				Size = new Vector2(20),
 				HAlign = 1f
@@ -43,10 +51,19 @@ namespace Teleportation.UI
 
 		public override void Click(UIMouseEvent evt)
 		{
-			if (evt.Target != this) return;
+			if (evt.Target == buttomShowOnMap) return;
 
-			Grid.items.ForEach(item => item.Selected = false);
-			Selected = true;
+			if (Selected)
+			{
+				Selected = false;
+				panel.SelectedDestination = Point16.NegativeOne;
+			}
+			else
+			{
+				Grid.items.ForEach(item => item.Selected = false);
+				Selected = true;
+				panel.SelectedDestination = teleporter.Position;
+			}
 		}
 
 		public override void PreDraw(SpriteBatch spriteBatch)

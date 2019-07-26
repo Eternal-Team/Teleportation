@@ -35,15 +35,12 @@ namespace Teleportation.TileEntities
 		public ItemHandler Handler { get; }
 
 		public Ref<string> DisplayName = new Ref<string>("Teleporter");
-		public Point16 Destination;
+		public Point16 Destination = Point16.NegativeOne;
 		public bool[] Whitelist = {true, false, false, false};
 		public bool DialOnce;
 
 		public Texture2D EntityTexture;
 		public DrawAnimation EntityAnimation;
-
-		// todo: maybe assign each player a unique ID
-		public List<string> WhitelistPlayers = new List<string>();
 
 		public Teleporter()
 		{
@@ -84,6 +81,8 @@ namespace Teleportation.TileEntities
 				{
 					foreach (Player player in players)
 					{
+						if (!Handler.Shrink(0, 1)) break;
+
 						player.Teleport(Destination.ToWorldCoordinates(0, 0) + new Vector2(24 - player.width * 0.5f, -player.height));
 						NetMessage.SendData(MessageID.Teleport, -1, -1, null, 0, player.whoAmI, player.position.X, player.position.Y);
 
@@ -101,7 +100,12 @@ namespace Teleportation.TileEntities
 
 				if (npcs.Any())
 				{
-					foreach (NPC npc in npcs) npc.Teleport(Destination.ToWorldCoordinates(0, 0) + new Vector2(24 - npc.width * 0.5f, -npc.height));
+					foreach (NPC npc in npcs)
+					{
+						if (Main.rand.Next(10) != 0 && !Handler.Shrink(0, 1)) break;
+
+						npc.Teleport(Destination.ToWorldCoordinates(0, 0) + new Vector2(24 - npc.width * 0.5f, -npc.height));
+					}
 
 					teleported = true;
 				}
@@ -115,6 +119,8 @@ namespace Teleportation.TileEntities
 				{
 					foreach (Item item in items)
 					{
+						if (Main.rand.Next(10) != 0 && !Handler.Shrink(0, 1)) break;
+
 						item.position = Destination.ToWorldCoordinates(0, 0) + new Vector2(24 - item.width * 0.5f, -item.height);
 						NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI);
 					}
@@ -131,6 +137,8 @@ namespace Teleportation.TileEntities
 				{
 					foreach (Projectile projectile in projectiles)
 					{
+						if (Main.rand.Next(10) != 0 && !Handler.Shrink(0, 1)) break;
+
 						projectile.position = Destination.ToWorldCoordinates(0, 0) + new Vector2(24 - projectile.width * 0.5f, -projectile.height);
 						NetMessage.SendData(MessageID.SyncProjectile, -1, -1, null, projectile.whoAmI);
 					}

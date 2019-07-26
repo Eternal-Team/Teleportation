@@ -17,8 +17,7 @@ namespace Teleportation
 			SyncTeleporterName,
 			SyncTeleporterDestination,
 			SyncTeleporterIcon,
-			SyncTeleporterWhitelist,
-			SyncTeleporterPlayerWhitelist
+			SyncTeleporterWhitelist
 		}
 
 		internal static ModPacket GetPacket(PacketType packetType)
@@ -48,9 +47,6 @@ namespace Teleportation
 					break;
 				case PacketType.SyncTeleporterWhitelist:
 					ReceiveTeleporterWhitelist(reader, whoAmI);
-					break;
-				case PacketType.SyncTeleporterPlayerWhitelist:
-					ReceiveTeleporterPlayerWhitelist(reader, whoAmI);
 					break;
 			}
 		}
@@ -155,30 +151,6 @@ namespace Teleportation
 			for (int i = 0; i < 4; i++) teleporter.Whitelist[i] = reader.ReadBoolean();
 
 			if (Main.netMode == NetmodeID.Server) SendTeleporterWhitelist(teleporter, whoAmI);
-		}
-
-		// todo: needs to update UIs
-		internal static void SendTeleporterPlayerWhitelist(Teleporter teleporter, int ignoreClient = -1)
-		{
-			if (Main.netMode == NetmodeID.SinglePlayer) return;
-
-			ModPacket packet = GetPacket(PacketType.SyncTeleporterPlayerWhitelist);
-			packet.Write(teleporter.ID);
-
-			packet.Write(teleporter.WhitelistPlayers.Count);
-			foreach (string player in teleporter.WhitelistPlayers) packet.Write(player);
-
-			packet.Send(ignoreClient: ignoreClient);
-		}
-
-		private static void ReceiveTeleporterPlayerWhitelist(BinaryReader reader, int whoAmI)
-		{
-			Teleporter teleporter = (Teleporter)TileEntity.ByID[reader.ReadInt32()];
-
-			teleporter.WhitelistPlayers.Clear();
-			for (int i = 0; i < reader.ReadInt32(); i++) teleporter.WhitelistPlayers.Add(reader.ReadString());
-
-			if (Main.netMode == NetmodeID.Server) SendTeleporterPlayerWhitelist(teleporter, whoAmI);
 		}
 	}
 }

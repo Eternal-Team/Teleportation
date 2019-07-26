@@ -2,7 +2,6 @@
 using BaseLibrary.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Teleportation.TileEntities;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Enums;
@@ -43,7 +42,7 @@ namespace Teleportation.Tiles
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)
 		{
 			TileEntities.Teleporter teleporter = mod.GetTileEntity<TileEntities.Teleporter>(i, j);
-			if (teleporter == null || !Main.tile[i, j].IsTopLeft() || teleporter.Destination == null) return true;
+			if (teleporter == null || !Main.tile[i, j].IsTopLeft() || teleporter.Destination == Point16.NegativeOne) return true;
 
 			Vector2 position = new Point16(i + 1, j).ToScreenCoordinates();
 

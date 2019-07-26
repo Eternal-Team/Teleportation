@@ -1,10 +1,9 @@
 ﻿using BaseLibrary;
 using BaseLibrary.UI;
 using BaseLibrary.UI.Elements;
+using ContainerLibrary;
 using Microsoft.Xna.Framework;
-using System.Linq;
 using Teleportation.Items;
-using Teleportation.TileEntities;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -13,16 +12,23 @@ using Teleporter = Teleportation.TileEntities.Teleporter;
 
 namespace Teleportation.UI
 {
-	public class TeleporterPanel : BaseUIPanel<Teleporter>
+	public class TeleporterPanel : BaseUIPanel<Teleporter>, IItemHandlerUI
 	{
+		public ItemHandler Handler => Container.Handler;
+		public string GetTexture(Item item) => Teleportation.Instance.GetItem<Items.Teleporter>().Texture;
+
 		private UIGrid<UITeleporterItem> gridLocations;
 
 		private BaseElement panelMain;
 		private BaseElement panelSettings;
 		private BaseElement currentPanel;
 
+		public Point16 SelectedDestination;
+
 		public override void OnInitialize()
 		{
+			SelectedDestination = Container.Destination;
+
 			Width = (0, 0.2f);
 			Height = (0, 0.35f);
 			this.Center();
@@ -61,7 +67,7 @@ namespace Teleportation.UI
 			buttonOptions.OnClick += (evt, element) =>
 			{
 				RemoveChild(currentPanel);
-				currentPanel = panelSettings;
+				currentPanel = currentPanel == panelSettings ? panelMain : panelSettings;
 				Append(currentPanel);
 			};
 			Append(buttonOptions);
@@ -76,15 +82,10 @@ namespace Teleportation.UI
 
 			SetupMainPanel();
 			SetupSettingsPanel();
-			SetupWhitelistPanel();
 
 			RemoveChild(currentPanel);
 			currentPanel = panelMain;
 			Append(currentPanel);
-		}
-
-		private void SetupWhitelistPanel()
-		{
 		}
 
 		private void SetupSettingsPanel()
@@ -181,9 +182,9 @@ namespace Teleportation.UI
 			buttonIcon.OnClick += (evt, element) =>
 			{
 				Pipette pipette = (Pipette)Main.mouseItem.modItem;
-				if (pipette == null)return;
+				if (pipette == null) return;
 
-				if (pipette.EntityTexture != null)Container.EntityTexture = pipette.EntityTexture;
+				if (pipette.EntityTexture != null) Container.EntityTexture = pipette.EntityTexture;
 				if (pipette.EntityAnimation != null) Container.EntityAnimation = pipette.EntityAnimation;
 
 				Net.SendTeleporterIcon(Container);
@@ -226,41 +227,41 @@ namespace Teleportation.UI
 			gridLocations.SetScrollbar(scrollbarLocations);
 			panelLocations.Append(scrollbarLocations);
 
-			UITextButton buttonDialOnce = new UITextButton(Language.GetText("Mods.Teleportation.UI.DialOnce").ToString())
+			UITextButton buttonDialOnce = new UITextButton(Language.GetText("Mods.Teleportation.UI.DialOnce"))
 			{
-				Width = (-4, 1 / 3f),
+				Width = (-4, 0.25f),
 				Height = (40, 0),
-				Top = (-40, 1)
+				VAlign = 1f
 			};
 			buttonDialOnce.OnClick += (evt, element) =>
 			{
-				Container.Destination = gridLocations.items.FirstOrDefault(item => item.Selected)?.teleporter.Position??Point16.NegativeOne;
+				Container.Destination = SelectedDestination;
 				Container.DialOnce = true;
 				Net.SendTeleporterDestination(Container);
 			};
 			panelMain.Append(buttonDialOnce);
 
-			UITextButton buttonDial = new UITextButton(Language.GetText("Mods.Teleportation.UI.Dial").ToString())
+			UITextButton buttonDial = new UITextButton(Language.GetText("Mods.Teleportation.UI.Dial"))
 			{
-				Width = (-4, 1 / 3f),
+				Width = (-4, 0.25f),
 				Height = (40, 0),
-				Top = (-40, 1),
-				HAlign = 0.5f
+				VAlign = 1f,
+				HAlign = 1 / 3f
 			};
 			buttonDial.OnClick += (evt, element) =>
 			{
-				Container.Destination = gridLocations.items.FirstOrDefault(item => item.Selected)?.teleporter.Position ?? Point16.NegativeOne;
+				Container.Destination = SelectedDestination;
 				Container.DialOnce = false;
 				Net.SendTeleporterDestination(Container);
 			};
 			panelMain.Append(buttonDial);
 
-			UITextButton buttonInterrupt = new UITextButton(Language.GetText("Mods.Teleportation.UI.Interrupt").ToString())
+			UITextButton buttonInterrupt = new UITextButton(Language.GetText("Mods.Teleportation.UI.Interrupt"))
 			{
-				Width = (-4, 1 / 3f),
+				Width = (-4, 0.25f),
 				Height = (40, 0),
-				Top = (-40, 1),
-				HAlign = 1f
+				HAlign = 2 / 3f,
+				VAlign = 1f
 			};
 			buttonInterrupt.OnClick += (evt, element) =>
 			{
@@ -271,8 +272,14 @@ namespace Teleportation.UI
 			};
 			panelMain.Append(buttonInterrupt);
 
-			// todo: needs fuel slot
-			// todo: selection teleporters is wonky at some point
+			UIContainerSlot slotFuel = new UIContainerSlot(() => Container.Handler)
+			{
+				Width = (-4, 0.25f),
+				HAlign = 1f,
+				VAlign = 1f,
+				Padding = (0, 24, 24, 0)
+			};
+			panelMain.Append(slotFuel);
 		}
 
 		public void PopulateGrid()
@@ -283,11 +290,10 @@ namespace Teleportation.UI
 			{
 				if (tileEntity is Teleporter teleporter && teleporter != Container)
 				{
-					UITeleporterItem teleporterItem = new UITeleporterItem(teleporter)
+					UITeleporterItem teleporterItem = new UITeleporterItem(teleporter, this)
 					{
 						Width = (0, 1),
-						Height = (60, 0),
-						Selected = Container.Destination == teleporter.Destination
+						Height = (60, 0)
 					};
 					gridLocations.Add(teleporterItem);
 				}

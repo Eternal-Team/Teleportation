@@ -48,6 +48,6 @@ namespace Teleportation
 			}
 		}
 
-		public override void HandlePacket(BinaryReader reader, int whoAmI) => Net.HandlePacket(reader,whoAmI);
+		public override void HandlePacket(BinaryReader reader, int whoAmI) => Net.HandlePacket(reader, whoAmI);
 	}
 }
