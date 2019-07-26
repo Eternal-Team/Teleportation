@@ -3,7 +3,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
-namespace Teleportation.Tiles
+namespace Teleportation.Items
 {
 	public class FuelCell : BaseItem
 	{
@@ -11,8 +11,6 @@ namespace Teleportation.Tiles
 
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Fuel Cell");
-
 			Main.RegisterItemAnimation(item.type, new DrawAnimationVertical(5, 5));
 		}
 

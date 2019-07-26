@@ -1,0 +1,13 @@
+ItemName.Teleporter=Teleporter
+ItemName.Pipette=Pipette
+ItemName.FuelCell=Fuel Cell
+
+ItemTooltip.Teleporter=Beam me up, Scotty!
+ItemTooltip.Pipette=Used to pick icons from items, NPCs, projectiles
+
+MapObject.Teleporter=Teleporter
+
+UI.SetIcon=Click with a [item:{0}] to set icon
+UI.DialOnce=Dial Once
+UI.Dial=Dial
+UI.Interrupt=Interrupt

@@ -6,12 +6,6 @@ namespace Teleportation.Items
 	{
 		public override string Texture => "Teleportation/Textures/Items/Teleporter";
 
-		public override void SetStaticDefaults()
-		{
-			DisplayName.SetDefault("Teleporter");
-			Tooltip.SetDefault("Beam me up, Scotty!");
-		}
-
 		public override void SetDefaults()
 		{
 			item.width = 16;

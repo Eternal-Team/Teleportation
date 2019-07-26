@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.UI;
 
 namespace Teleportation.UI
 {
@@ -14,11 +13,9 @@ namespace Teleportation.UI
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
-			CalculatedStyle dimensions = GetDimensions();
-
-			spriteBatch.Draw(FuelBar, dimensions.Position(), Color.White);
-			spriteBatch.Draw(FuelBar, dimensions.Position() + new Vector2(dimensions.Width - 12, 0), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically, 0f);
-			spriteBatch.Draw(Main.magicPixel, new Rectangle((int)(dimensions.X + 12), (int)dimensions.Y, (int)(dimensions.Width - 24), (int)dimensions.Height), ColorBar);
+			spriteBatch.Draw(FuelBar, Dimensions.Position(), Color.White);
+			spriteBatch.Draw(FuelBar, Dimensions.Position() + new Vector2(Dimensions.Width - 12, 0), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically, 0f);
+			spriteBatch.Draw(Main.magicPixel, new Rectangle((int)(Dimensions.X + 12), (int)Dimensions.Y, (int)(Dimensions.Width - 24), (int)Dimensions.Height), ColorBar);
 		}
 	}
 }

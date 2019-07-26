@@ -10,12 +10,12 @@ namespace Teleportation.UI
 {
 	public class UITeleporterItem : UIPanel, IGridElement<UITeleporterItem>
 	{
-		public TETeleporter teleporter;
+		public Teleporter teleporter;
 		public bool Selected;
 
 		public UIGrid<UITeleporterItem> Grid { get; set; }
 
-		public UITeleporterItem(TETeleporter teleporter)
+		public UITeleporterItem(Teleporter teleporter)
 		{
 			this.teleporter = teleporter;
 

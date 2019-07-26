@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using BaseLibrary;
+﻿using BaseLibrary;
 using BaseLibrary.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -26,12 +26,6 @@ namespace Teleportation.Items
 			clone.EntityTexture = EntityTexture;
 			clone.EntityAnimation = EntityAnimation;
 			return clone;
-		}
-
-		public override void SetStaticDefaults()
-		{
-			DisplayName.SetDefault("Pipette");
-			Tooltip.SetDefault("Used to pick icons from items, NPCs, projectiles");
 		}
 
 		public override void SetDefaults()

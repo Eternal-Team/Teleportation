@@ -1,8 +1,8 @@
-﻿using System;
-using BaseLibrary;
+﻿using BaseLibrary;
 using BaseLibrary.UI.Elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using Teleportation.TileEntities;
 using Terraria;
 using Terraria.DataStructures;
@@ -11,11 +11,11 @@ namespace Teleportation.UI
 {
 	public class UIIcon : BaseElement
 	{
-		private TETeleporter teleporter;
+		private Teleporter teleporter;
 		private Texture2D Texture => teleporter.EntityTexture;
 		private DrawAnimation Animation => teleporter.EntityAnimation;
 
-		public UIIcon(TETeleporter teleporter)
+		public UIIcon(Teleporter teleporter)
 		{
 			this.teleporter = teleporter;
 			SetPadding(5);
