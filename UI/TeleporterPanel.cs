@@ -266,7 +266,6 @@ namespace Teleportation.UI
 			buttonInterrupt.OnClick += (evt, element) =>
 			{
 				Container.Destination = Point16.NegativeOne;
-				gridLocations.items.ForEach(item => item.Selected = false);
 				Container.DialOnce = false;
 				Net.SendTeleporterDestination(Container);
 			};

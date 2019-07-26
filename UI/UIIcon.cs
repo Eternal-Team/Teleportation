@@ -18,19 +18,17 @@ namespace Teleportation.UI
 		public UIIcon(Teleporter teleporter)
 		{
 			this.teleporter = teleporter;
-			SetPadding(5);
+			SetPadding(8);
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
 			spriteBatch.DrawPanel(Dimensions);
 
-			if (Texture == null) return;
-
-			// different state?
-			spriteBatch.Draw(Utility.PointClampState, () =>
+			// different state? PointClampState
+			spriteBatch.Draw(Utility.ImmediateState, () =>
 			{
-				Rectangle rectangle = Animation?.GetFrame(Texture) ?? Texture.Frame();
+				Rectangle rectangle = Animation.GetFrame(Texture);
 				spriteBatch.Draw(Texture, Dimensions.Center(), rectangle, Color.White, 0f, rectangle.Size() * 0.5f, Math.Min(InnerDimensions.Width / rectangle.Width, InnerDimensions.Height / rectangle.Height), SpriteEffects.None, 0f);
 			});
 		}

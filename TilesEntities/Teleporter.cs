@@ -5,7 +5,6 @@ using ContainerLibrary;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Teleportation.Items;
@@ -34,7 +33,7 @@ namespace Teleportation.TileEntities
 
 		public ItemHandler Handler { get; }
 
-		public Ref<string> DisplayName = new Ref<string>("Teleporter");
+		public BaseLibrary.Ref<string> DisplayName = new BaseLibrary.Ref<string>("Teleporter");
 		public Point16 Destination = Point16.NegativeOne;
 		public bool[] Whitelist = {true, false, false, false};
 		public bool DialOnce;
@@ -67,83 +66,72 @@ namespace Teleportation.TileEntities
 
 		public override void Update()
 		{
-			if (Destination == Point16.NegativeOne) return;
+			if (Destination == Point16.NegativeOne || Handler.Items[0].IsAir) return;
 
 			bool teleported = false;
 
 			if (Whitelist[0])
 			{
-				// todo: use less linq
-
-				List<Player> players = Main.player.Where(player => player.getRect().Intersects(Hitbox)).ToList();
-
-				if (players.Any())
+				foreach (Player player in Main.player)
 				{
-					foreach (Player player in players)
+					if (player != null && player.active && !player.dead && player.getRect().Intersects(Hitbox))
 					{
-						if (!Handler.Shrink(0, 1)) break;
+						Handler.Shrink(0, 1);
 
-						player.Teleport(Destination.ToWorldCoordinates(0, 0) + new Vector2(24 - player.width * 0.5f, -player.height));
+						player.Teleport(Destination.ToWorldCoordinates(24 - player.width * 0.5f, -player.height));
 						NetMessage.SendData(MessageID.Teleport, -1, -1, null, 0, player.whoAmI, player.position.X, player.position.Y);
 
-						// todo: gets run on server, need to send a message to close the UIs
-						if (player == Main.LocalPlayer && UI != null) BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(this);
-					}
+						// todo: gets run on server, need to send a message to close the UI
 
-					teleported = true;
+						teleported = true;
+					}
 				}
 			}
 
 			if (Whitelist[1])
 			{
-				List<NPC> npcs = Main.npc.Where(npc => npc.getRect().Intersects(Hitbox)).ToList();
-
-				if (npcs.Any())
+				foreach (NPC npc in Main.npc)
 				{
-					foreach (NPC npc in npcs)
+					if (npc != null && npc.active && npc.getRect().Intersects(Hitbox))
 					{
-						if (Main.rand.Next(10) != 0 && !Handler.Shrink(0, 1)) break;
+						if (Main.rand.NextBool(10)) Handler.Shrink(0, 1);
 
-						npc.Teleport(Destination.ToWorldCoordinates(0, 0) + new Vector2(24 - npc.width * 0.5f, -npc.height));
+						npc.Teleport(Destination.ToWorldCoordinates(24 - npc.width * 0.5f, -npc.height));
+
+						teleported = true;
 					}
-
-					teleported = true;
 				}
 			}
 
 			if (Whitelist[2])
 			{
-				List<Item> items = Main.item.Where(item => item.getRect().Intersects(Hitbox)).ToList();
-
-				if (items.Any())
+				foreach (Item item in Main.item)
 				{
-					foreach (Item item in items)
+					if (item != null && item.active && item.getRect().Intersects(Hitbox))
 					{
-						if (Main.rand.Next(10) != 0 && !Handler.Shrink(0, 1)) break;
+						if (Main.rand.NextBool(10)) Handler.Shrink(0, 1);
 
-						item.position = Destination.ToWorldCoordinates(0, 0) + new Vector2(24 - item.width * 0.5f, -item.height);
+						item.position = Destination.ToWorldCoordinates(24 - item.width * 0.5f, -item.height);
 						NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI);
-					}
 
-					teleported = true;
+						teleported = true;
+					}
 				}
 			}
 
 			if (Whitelist[3])
 			{
-				List<Projectile> projectiles = Main.projectile.Where(projectile => projectile.getRect().Intersects(Hitbox)).ToList();
-
-				if (projectiles.Any())
+				foreach (Projectile projectile in Main.projectile)
 				{
-					foreach (Projectile projectile in projectiles)
+					if (projectile != null && projectile.active && projectile.getRect().Intersects(Hitbox))
 					{
-						if (Main.rand.Next(10) != 0 && !Handler.Shrink(0, 1)) break;
+						if (Main.rand.NextBool(10)) Handler.Shrink(0, 1);
 
-						projectile.position = Destination.ToWorldCoordinates(0, 0) + new Vector2(24 - projectile.width * 0.5f, -projectile.height);
+						projectile.position = Destination.ToWorldCoordinates(24 - projectile.width * 0.5f, -projectile.height);
 						NetMessage.SendData(MessageID.SyncProjectile, -1, -1, null, projectile.whoAmI);
-					}
 
-					teleported = true;
+						teleported = true;
+					}
 				}
 			}
 
@@ -155,24 +143,16 @@ namespace Teleportation.TileEntities
 			}
 		}
 
-		private string IconPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{UUID}.teleporterIcon";
-
-		// todo: could store as two files - texture and metadata
-		// todo: or figure out how to store metadata on the png file
-		// todo: would allows users to set custom icon
+		// todo: should also append position/name to the file name so people can find it easily
+		private string IconPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{UUID}.png";
+		private string MetadataPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{UUID}.txt";
 
 		public override TagCompound Save()
 		{
 			Directory.CreateDirectory($"{Main.SavePath}/Worlds/{Main.worldName}");
-			using (FileStream stream = new FileStream(IconPath, FileMode.Create))
-			{
-				BinaryWriter writer = new BinaryWriter(stream);
-				writer.Write(EntityAnimation.TicksPerFrame);
-				writer.Write(EntityAnimation.FrameCount);
 
-				EntityTexture.SaveAsPng(writer.BaseStream, EntityTexture.Width, EntityTexture.Height);
-				writer.Close();
-			}
+			using (FileStream st = File.Open(IconPath, FileMode.Create)) EntityTexture.SaveAsPng(st, EntityTexture.Width, EntityTexture.Height);
+			File.WriteAllText(MetadataPath, $"{EntityAnimation.TicksPerFrame};{EntityAnimation.FrameCount}");
 
 			return new TagCompound
 			{
@@ -186,32 +166,27 @@ namespace Teleportation.TileEntities
 
 		public override void Load(TagCompound tag)
 		{
+			UUID = tag.Get<Guid>("UUID");
+
+			if (File.Exists(IconPath))
+			{
+				using (FileStream stream = File.Open(IconPath, FileMode.Open)) EntityTexture = Texture2D.FromStream(Main.graphics.GraphicsDevice, stream);
+			}
+			else EntityTexture = Main.itemTexture[mod.ItemType<Items.Teleporter>()];
+
+			if (File.Exists(MetadataPath))
+			{
+				string[] text = File.ReadAllText(MetadataPath).Split(';');
+				if (int.TryParse(text[0], out int ticksPerFrame) && int.TryParse(text[1], out int frameCount)) EntityAnimation = new DrawAnimationVertical(ticksPerFrame, frameCount);
+			}
+			else EntityAnimation = new DrawAnimationVertical(0, 1);
+
 			DisplayName.Value = tag.GetString("DisplayName");
 			Whitelist = tag.GetList<bool>("Whitelist").ToArray();
 
 			Destination = tag.Get<Point16>("Destination");
 
-			UUID = tag.Get<Guid>("UUID");
 			Handler.Load(tag.GetCompound("Items"));
-
-			if (File.Exists(IconPath))
-			{
-				using (FileStream stream = new FileStream(IconPath, FileMode.Open))
-				{
-					using (BinaryReader reader = new BinaryReader(stream))
-					{
-						EntityAnimation = new DrawAnimationVertical(reader.ReadInt32(), reader.ReadInt32());
-
-						using (MemoryStream memoryStream = new MemoryStream())
-						{
-							stream.CopyTo(memoryStream);
-
-							EntityTexture = Texture2D.FromStream(Main.graphics.GraphicsDevice, memoryStream);
-						}
-					}
-				}
-			}
-			else EntityTexture = Main.itemTexture[mod.ItemType<Items.Teleporter>()];
 		}
 
 		public override void NetSend(BinaryWriter writer, bool lightSend)

@@ -87,7 +87,6 @@ namespace Teleportation
 			if (Main.netMode == NetmodeID.Server) SendTeleporterName(teleporter, whoAmI);
 		}
 
-		// todo: needs to update UIs
 		internal static void SendTeleporterDestination(Teleporter teleporter, int ignoreClient = -1)
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer) return;
@@ -106,7 +105,6 @@ namespace Teleportation
 			if (Main.netMode == NetmodeID.Server) SendTeleporterDestination(teleporter, whoAmI);
 		}
 
-		// todo: needs to update UIs
 		internal static void SendTeleporterIcon(Teleporter teleporter, int ignoreClient = -1)
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer) return;
