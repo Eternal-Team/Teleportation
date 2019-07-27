@@ -25,7 +25,6 @@ namespace Teleportation.UI
 		{
 			spriteBatch.DrawPanel(Dimensions);
 
-			// different state? PointClampState
 			spriteBatch.Draw(Utility.ImmediateState, () =>
 			{
 				Rectangle rectangle = Animation.GetFrame(Texture);

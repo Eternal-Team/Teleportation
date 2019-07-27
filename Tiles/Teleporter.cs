@@ -22,11 +22,12 @@ namespace Teleportation.Tiles
 			Main.tileNoAttach[Type] = false;
 			Main.tileLavaDeath[Type] = false;
 			Main.tileHammer[Type] = false;
+			Main.tileLighted[Type] = true;
 
 			TileObjectData.newTile.Width = 3;
 			TileObjectData.newTile.Height = 1;
 			TileObjectData.newTile.Origin = new Point16(0, 0);
-			TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile, 1, 0);
+			TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile, 3, 0);
 			TileObjectData.newTile.UsesCustomCanPlace = true;
 			TileObjectData.newTile.CoordinateHeights = new[] {16};
 			TileObjectData.newTile.CoordinateWidth = 16;
@@ -49,6 +50,25 @@ namespace Teleportation.Tiles
 			spriteBatch.Draw(Teleportation.teleporterEffect, position + new Vector2(8, 2), null, Color.White * 0.75f, 0f, new Vector2(10, 100), new Vector2(2, 1), SpriteEffects.None, 0f);
 
 			return true;
+		}
+
+		public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b)
+		{
+			TileEntities.Teleporter teleporter = mod.GetTileEntity<TileEntities.Teleporter>(i, j);
+			if (teleporter == null) return;
+
+			if (teleporter.Destination != Point16.NegativeOne)
+			{
+				r = 1.0f;
+				g = 0.863f;
+				b = 0.0f;
+			}
+			else
+			{
+				r = 0.2f;
+				g = 0.2f;
+				b = 0.8f;
+			}
 		}
 
 		public override void DrawEffects(int i, int j, SpriteBatch spriteBatch, ref Color drawColor, ref int nextSpecialDrawIndex)

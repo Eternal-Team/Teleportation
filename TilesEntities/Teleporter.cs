@@ -17,6 +17,8 @@ using Terraria.ModLoader.IO;
 
 namespace Teleportation.TileEntities
 {
+	// note: multiple inbounds connections, can't connect to them?
+
 	public class Teleporter : BaseTE, IHasUI, IItemHandler
 	{
 		public override Type TileType => typeof(Tiles.Teleporter);
