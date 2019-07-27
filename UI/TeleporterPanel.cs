@@ -35,7 +35,7 @@ namespace Teleportation.UI
 
 			UITextInput inputName = new UITextInput(ref Container.DisplayName)
 			{
-				Width = (-56, 1),
+				Width = (Container.DisplayName.ToString().Measure(Utility.Font).X, 0),
 				Height = (20, 0),
 				HAlign = 0.5f,
 				MaxLength = 24,
@@ -43,7 +43,11 @@ namespace Teleportation.UI
 				HintText = "Teleporter",
 				HorizontalAlignment = HorizontalAlignment.Center
 			};
-			inputName.OnTextChange += () => Net.SendTeleporterName(Container);
+			inputName.OnTextChange += () =>
+			{
+				inputName.Width = (inputName.Text.Measure(Utility.Font).X, 0);
+				Net.SendTeleporterName(Container);
+			};
 			Append(inputName);
 
 			UITextButton buttonClose = new UITextButton("X")
@@ -276,8 +280,10 @@ namespace Teleportation.UI
 				Width = (-4, 0.25f),
 				HAlign = 1f,
 				VAlign = 1f,
-				Padding = (0, 24, 24, 0)
+				Padding = (0, 24, 24, 0),
+				PreviewItem = new Item()
 			};
+			slotFuel.PreviewItem.SetDefaults(Teleportation.Instance.ItemType<FuelCell>());
 			panelMain.Append(slotFuel);
 		}
 
