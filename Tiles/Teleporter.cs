@@ -207,6 +207,8 @@ namespace Teleportation.Tiles
 			AddMapEntry(Color.Cyan, name);
 		}
 
+		// todo: fix the beam effect
+
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)
 		{
 			TileEntities.Teleporter teleporter = Utility.GetTileEntity<TileEntities.Teleporter>(i, j);

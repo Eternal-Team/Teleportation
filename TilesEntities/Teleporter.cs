@@ -81,7 +81,7 @@ namespace Teleportation.TileEntities
 
 			if (Main.netMode != NetmodeID.Server)
 			{
-				foreach (TeleporterPanel teleporterPanel in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements.OfType<TeleporterPanel>()) teleporterPanel.PopulateGrid();
+				foreach (TeleporterPanel teleporterPanel in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements.OfType<TeleporterPanel>()) teleporterPanel.UpdateGrid();
 			}
 		}
 
@@ -227,7 +227,7 @@ namespace Teleportation.TileEntities
 
 			writer.Write(UUID);
 			writer.Write(_destination);
-			for (int i = 0; i < 4; i++) writer.Write(Whitelist[i]);
+			for (int i = 0; i < Whitelist.Length; i++) writer.Write(Whitelist[i]);
 
 			writer.Write(EntityAnimation.TicksPerFrame);
 			writer.Write(EntityAnimation.FrameCount);
@@ -244,7 +244,7 @@ namespace Teleportation.TileEntities
 
 			UUID = reader.ReadGUID();
 			_destination = reader.ReadPoint16();
-			for (int i = 0; i < 4; i++) Whitelist[i] = reader.ReadBoolean();
+			for (int i = 0; i < Whitelist.Length; i++) Whitelist[i] = reader.ReadBoolean();
 
 			EntityAnimation = new DrawAnimationVertical(reader.ReadInt32(), reader.ReadInt32());
 			EntityTexture = Texture2D.FromStream(Main.graphics.GraphicsDevice, reader.BaseStream);

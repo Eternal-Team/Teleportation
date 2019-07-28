@@ -2,10 +2,12 @@
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 using Teleportation.TileEntities;
+using Teleportation.UI;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.UI;
 
 namespace Teleportation
 {
@@ -129,7 +131,6 @@ namespace Teleportation
 			if (Main.netMode == NetmodeID.Server) SendTeleporterIcon(teleporter, whoAmI);
 		}
 
-		// todo: needs to update UIs
 		internal static void SendTeleporterWhitelist(Teleporter teleporter, int ignoreClient = -1)
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer) return;
@@ -137,7 +138,7 @@ namespace Teleportation
 			ModPacket packet = GetPacket(PacketType.SyncTeleporterWhitelist);
 			packet.Write(teleporter.ID);
 
-			for (int i = 0; i < 4; i++) packet.Write(teleporter.Whitelist[i]);
+			for (int i = 0; i < teleporter.Whitelist.Length; i++) packet.Write(teleporter.Whitelist[i]);
 
 			packet.Send(ignoreClient: ignoreClient);
 		}
@@ -146,7 +147,15 @@ namespace Teleportation
 		{
 			Teleporter teleporter = (Teleporter)TileEntity.ByID[reader.ReadInt32()];
 
-			for (int i = 0; i < 4; i++) teleporter.Whitelist[i] = reader.ReadBoolean();
+			for (int i = 0; i < teleporter.Whitelist.Length; i++) teleporter.Whitelist[i] = reader.ReadBoolean();
+
+			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
+				foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements)
+				{
+					if (element is TeleporterPanel panel && panel.Container == teleporter) panel.UpdateWhitelist();
+				}
+			}
 
 			if (Main.netMode == NetmodeID.Server) SendTeleporterWhitelist(teleporter, whoAmI);
 		}
