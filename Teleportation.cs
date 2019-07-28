@@ -17,11 +17,12 @@ namespace Teleportation
 		internal static Teleportation Instance;
 
 		internal static Texture2D teleporterEffect;
-		internal static Texture2D teleporterGlow;
+		internal static Texture2D[] teleporterGlow;
 		internal static Texture2D whitelistPlayer;
 		internal static Texture2D whitelistNPC;
 		internal static Texture2D whitelistItem;
 		internal static Texture2D whitelistProjectile;
+		internal static Texture2D whitelistBoss;
 
 		public override void Load()
 		{
@@ -29,12 +30,19 @@ namespace Teleportation
 
 			if (!Main.dedServ)
 			{
-				teleporterEffect = ModContent.GetTexture("Teleportation/Textures/TeleporterEffect");
-				teleporterGlow = ModContent.GetTexture("Teleportation/Textures/TeleporterGlow");
-				whitelistPlayer = ModContent.GetTexture("Teleportation/Textures/Whitelist_Player");
-				whitelistNPC = ModContent.GetTexture("Teleportation/Textures/Whitelist_NPC");
-				whitelistItem = ModContent.GetTexture("Teleportation/Textures/Whitelist_Item");
-				whitelistProjectile = ModContent.GetTexture("Teleportation/Textures/Whitelist_Projectile");
+				teleporterEffect = ModContent.GetTexture("Teleportation/Textures/Tiles/TeleporterEffect");
+
+				teleporterGlow = new Texture2D[4];
+				teleporterGlow[0] = ModContent.GetTexture("Teleportation/Textures/Tiles/BasicTeleporter_Glow");
+				teleporterGlow[1] = ModContent.GetTexture("Teleportation/Textures/Tiles/AdvancedTeleporter_Glow");
+				teleporterGlow[2] = ModContent.GetTexture("Teleportation/Textures/Tiles/EliteTeleporter_Glow");
+				teleporterGlow[3] = ModContent.GetTexture("Teleportation/Textures/Tiles/UltimateTeleporter_Glow");
+
+				whitelistPlayer = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_Player");
+				whitelistNPC = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_NPC");
+				whitelistItem = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_Item");
+				whitelistProjectile = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_Projectile");
+				whitelistBoss = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_Boss");
 			}
 		}
 
@@ -42,10 +50,7 @@ namespace Teleportation
 
 		public override void UpdateUI(GameTime gameTime)
 		{
-			foreach (Teleporter teleporter in TileEntity.ByID.Values.OfType<Teleporter>())
-			{
-				teleporter.EntityAnimation?.Update();
-			}
+			foreach (Teleporter teleporter in TileEntity.ByID.Values.OfType<Teleporter>()) teleporter.EntityAnimation?.Update();
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI) => Net.HandlePacket(reader, whoAmI);

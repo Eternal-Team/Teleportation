@@ -93,14 +93,14 @@ namespace Teleportation
 
 			ModPacket packet = GetPacket(PacketType.SyncTeleporterName);
 			packet.Write(teleporter.ID);
-			packet.Write(teleporter.Destination);
+			packet.Write(teleporter.Destination.Position);
 			packet.Send(ignoreClient: ignoreClient);
 		}
 
 		private static void ReceiveTeleporterDestination(BinaryReader reader, int whoAmI)
 		{
 			Teleporter teleporter = (Teleporter)TileEntity.ByID[reader.ReadInt32()];
-			teleporter.Destination = reader.ReadPoint16();
+			teleporter.Destination = (Teleporter)TileEntity.ByPosition[reader.ReadPoint16()];
 
 			if (Main.netMode == NetmodeID.Server) SendTeleporterDestination(teleporter, whoAmI);
 		}

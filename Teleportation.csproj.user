@@ -5,5 +5,12 @@
     <StartProgram>C:\Program Files %28x86%29\Steam\steamapps\common\Terraria\Terraria.exe</StartProgram>
     <StartWorkingDirectory>C:\Program Files %28x86%29\Steam\steamapps\common\Terraria\</StartWorkingDirectory>
     <StartArguments>-skipselect Itorius:TestWorld</StartArguments>
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ActiveDebugProfile>Terraria</ActiveDebugProfile>
   </PropertyGroup>
 </Project>

@@ -23,7 +23,7 @@ namespace Teleportation.UI
 		private BaseElement panelSettings;
 		private BaseElement currentPanel;
 
-		public Point16 SelectedDestination;
+		public Teleporter SelectedDestination;
 
 		public override void OnInitialize()
 		{
@@ -41,13 +41,10 @@ namespace Teleportation.UI
 				MaxLength = 24,
 				RenderPanel = false,
 				HintText = "Teleporter",
-				HorizontalAlignment = HorizontalAlignment.Center
+				HorizontalAlignment = HorizontalAlignment.Center,
+				SizeToText = true
 			};
-			inputName.OnTextChange += () =>
-			{
-				inputName.Width = (inputName.Text.Measure(Utility.Font).X, 0);
-				Net.SendTeleporterName(Container);
-			};
+			inputName.OnTextChange += () => Net.SendTeleporterName(Container);
 			Append(inputName);
 
 			UITextButton buttonClose = new UITextButton("X")
@@ -55,9 +52,9 @@ namespace Teleportation.UI
 				Size = new Vector2(20),
 				Left = (-20, 1),
 				RenderPanel = false,
-				Padding = (0, 0, 0, 0)
+				Padding = (0, 0, 0, 0),
+				HoverText = Language.GetText("Mods.BaseLibrary.UI.Close")
 			};
-			buttonClose.GetHoverText += () => Language.GetText("Mods.BaseLibrary.UI.Close").ToString();
 			buttonClose.OnClick += (evt, element) => BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(Container);
 			Append(buttonClose);
 
@@ -65,9 +62,9 @@ namespace Teleportation.UI
 			{
 				Size = new Vector2(20),
 				RenderPanel = false,
-				Padding = (0, 0, 0, 0)
+				Padding = (0, 0, 0, 0),
+				HoverText = Language.GetText("Mods.BaseLibrary.UI.Options")
 			};
-			buttonOptions.GetHoverText += () => Language.GetText("Mods.BaseLibrary.UI.Options").ToString();
 			buttonOptions.OnClick += (evt, element) =>
 			{
 				RemoveChild(currentPanel);
@@ -101,7 +98,7 @@ namespace Teleportation.UI
 				Top = (28, 0)
 			};
 
-			UIText textWhitelist = new UIText(Language.GetText("Mods.BaseLibrary.UI.Whitelist").ToString())
+			UIText textWhitelist = new UIText(Language.GetText("Mods.BaseLibrary.UI.Whitelist"))
 			{
 				Top = (8, 0)
 			};
@@ -112,9 +109,9 @@ namespace Teleportation.UI
 				Size = new Vector2(40),
 				Top = (36, 0),
 				Padding = (6, 6, 6, 6),
-				Toggled = Container.Whitelist[0]
+				Toggled = Container.Whitelist[0],
+				HoverText = Language.GetText("Mods.BaseLibrary.UI.Players")
 			};
-			buttonPlayers.GetHoverText += () => Language.GetText("Mods.BaseLibrary.UI.Players").ToString();
 			buttonPlayers.OnClick += (evt, element) =>
 			{
 				Container.Whitelist[0] = !Container.Whitelist[0];
@@ -128,9 +125,9 @@ namespace Teleportation.UI
 				Top = (36, 0),
 				Left = (48, 0),
 				Padding = (6, 6, 6, 6),
-				Toggled = Container.Whitelist[1]
+				Toggled = Container.Whitelist[1],
+				HoverText = Language.GetText("Mods.BaseLibrary.UI.NPCs")
 			};
-			buttonNPCs.GetHoverText += () => Language.GetText("Mods.BaseLibrary.UI.NPCs").ToString();
 			buttonNPCs.OnClick += (evt, element) =>
 			{
 				Container.Whitelist[1] = !Container.Whitelist[1];
@@ -144,9 +141,9 @@ namespace Teleportation.UI
 				Top = (36, 0),
 				Left = (96, 0),
 				Padding = (6, 6, 6, 6),
-				Toggled = Container.Whitelist[2]
+				Toggled = Container.Whitelist[2],
+				HoverText = Language.GetText("Mods.BaseLibrary.UI.Items")
 			};
-			buttonItems.GetHoverText += () => Language.GetText("Mods.BaseLibrary.UI.Items").ToString();
 			buttonItems.OnClick += (evt, element) =>
 			{
 				Container.Whitelist[2] = !Container.Whitelist[2];
@@ -160,15 +157,31 @@ namespace Teleportation.UI
 				Top = (36, 0),
 				Left = (144, 0),
 				Padding = (6, 6, 6, 6),
-				Toggled = Container.Whitelist[3]
+				Toggled = Container.Whitelist[3],
+				HoverText = Language.GetText("Mods.BaseLibrary.UI.Projectiles")
 			};
-			buttonProjectiles.GetHoverText += () => Language.GetText("Mods.BaseLibrary.UI.Projectiles").ToString();
 			buttonProjectiles.OnClick += (evt, element) =>
 			{
 				Container.Whitelist[3] = !Container.Whitelist[3];
 				Net.SendTeleporterWhitelist(Container);
 			};
 			panelSettings.Append(buttonProjectiles);
+
+			UIToggleButton buttonBosses = new UIToggleButton(Teleportation.whitelistBoss, ScaleMode.Zoom)
+			{
+				Size = new Vector2(40),
+				Top = (36, 0),
+				Left = (192, 0),
+				Padding = (6, 6, 6, 6),
+				Toggled = Container.Whitelist[4],
+				HoverText = Language.GetText("Mods.BaseLibrary.UI.Bosses")
+			};
+			buttonBosses.OnClick += (evt, element) =>
+			{
+				Container.Whitelist[4] = !Container.Whitelist[4];
+				Net.SendTeleporterWhitelist(Container);
+			};
+			panelSettings.Append(buttonBosses);
 
 			UIText textIcon = new UIText(Language.GetText("Mods.BaseLibrary.UI.Icon"))
 			{
@@ -180,9 +193,9 @@ namespace Teleportation.UI
 			{
 				Size = new Vector2(40),
 				Top = (112, 0),
-				Padding = (6, 6, 6, 6)
+				Padding = (6, 6, 6, 6),
+				HoverText = Language.GetTextValue("Mods.Teleportation.UI.SetIcon", Teleportation.Instance.ItemType<Pipette>())
 			};
-			buttonIcon.GetHoverText += () => Language.GetTextValue("Mods.Teleportation.UI.SetIcon", Teleportation.Instance.ItemType<Pipette>());
 			buttonIcon.OnClick += (evt, element) =>
 			{
 				Pipette pipette = (Pipette)Main.mouseItem.modItem;
@@ -269,7 +282,8 @@ namespace Teleportation.UI
 			};
 			buttonInterrupt.OnClick += (evt, element) =>
 			{
-				Container.Destination = Point16.NegativeOne;
+				SelectedDestination = null;
+				Container.Destination = null;
 				Container.DialOnce = false;
 				Net.SendTeleporterDestination(Container);
 			};
@@ -291,17 +305,14 @@ namespace Teleportation.UI
 		{
 			gridLocations.Clear();
 
-			foreach (TileEntity tileEntity in TileEntity.ByID.Values)
+			foreach (Teleporter teleporter in Container.GetConnections())
 			{
-				if (tileEntity is Teleporter teleporter && teleporter != Container)
+				UITeleporterItem teleporterItem = new UITeleporterItem(teleporter, this)
 				{
-					UITeleporterItem teleporterItem = new UITeleporterItem(teleporter, this)
-					{
-						Width = (0, 1),
-						Height = (60, 0)
-					};
-					gridLocations.Add(teleporterItem);
-				}
+					Width = (0, 1),
+					Height = (60, 0)
+				};
+				gridLocations.Add(teleporterItem);
 			}
 		}
 	}

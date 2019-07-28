@@ -2,10 +2,8 @@
 
 namespace Teleportation.Items
 {
-	public class Teleporter : BaseItem
+	public abstract class Teleporter : BaseItem
 	{
-		public override string Texture => "Teleportation/Textures/Items/Teleporter";
-
 		public override void SetDefaults()
 		{
 			item.width = 16;
@@ -17,7 +15,54 @@ namespace Teleportation.Items
 			item.useTime = 10;
 			item.useStyle = 1;
 			item.consumable = true;
-			item.createTile = mod.TileType<Tiles.Teleporter>();
+		}
+	}
+
+	public class BasicTeleporter : Teleporter
+	{
+		public override string Texture => "Teleportation/Textures/Items/BasicTeleporter";
+
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+			
+			item.createTile = mod.TileType<Tiles.BasicTeleporter>();
+		}
+	}
+
+	public class AdvancedTeleporter : Teleporter
+	{
+		public override string Texture => "Teleportation/Textures/Items/AdvancedTeleporter";
+
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+
+			item.createTile = mod.TileType<Tiles.AdvancedTeleporter>();
+		}
+	}
+
+	public class EliteTeleporter : Teleporter
+	{
+		public override string Texture => "Teleportation/Textures/Items/EliteTeleporter";
+
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+
+			item.createTile = mod.TileType<Tiles.EliteTeleporter>();
+		}
+	}
+
+	public class UltimateTeleporter : Teleporter
+	{
+		public override string Texture => "Teleportation/Textures/Items/UltimateTeleporter";
+
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+
+			item.createTile = mod.TileType<Tiles.UltimateTeleporter>();
 		}
 	}
 }
