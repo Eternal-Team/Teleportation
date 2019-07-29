@@ -11,3 +11,7 @@ UI.SetIcon=Click with a [item:{0}] to set icon
 UI.DialOnce=Dial Once
 UI.Dial=Dial
 UI.Interrupt=Interrupt
+
+UI.InboundConnection=Inbound Connection
+UI.OutboundConnection=Outbound Connection
+UI.ShowOnMap=Show On Map
