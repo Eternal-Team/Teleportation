@@ -23,6 +23,8 @@ namespace Teleportation
 		internal static Texture2D whitelistItem;
 		internal static Texture2D whitelistProjectile;
 		internal static Texture2D whitelistBoss;
+		internal static Texture2D textureDepositAll;
+		internal static Texture2D textureRestock;
 
 		public override void Load()
 		{
@@ -43,6 +45,9 @@ namespace Teleportation
 				whitelistItem = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_Item");
 				whitelistProjectile = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_Projectile");
 				whitelistBoss = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_Boss");
+
+				textureDepositAll = ModContent.GetTexture("BaseLibrary/Textures/UI/DepositAll");
+				textureRestock = ModContent.GetTexture("BaseLibrary/Textures/UI/Restock");
 			}
 		}
 

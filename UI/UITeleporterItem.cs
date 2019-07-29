@@ -1,10 +1,11 @@
 ﻿using BaseLibrary;
+using BaseLibrary.UI;
 using BaseLibrary.UI.Elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.TileEntities;
 using Terraria;
-using Terraria.DataStructures;
+using Terraria.Localization;
 using Terraria.UI;
 
 namespace Teleportation.UI
@@ -20,6 +21,9 @@ namespace Teleportation.UI
 		public UIGrid<UITeleporterItem> Grid { get; set; }
 
 		private UIButton buttomShowOnMap;
+
+		private bool Outbound => panel.Container.Destination == teleporter;
+		private bool Inbound => teleporter.Destination == panel.Container;
 
 		public UITeleporterItem(Teleporter teleporter, TeleporterPanel panel)
 		{
@@ -42,10 +46,20 @@ namespace Teleportation.UI
 			buttomShowOnMap = new UIButton(Main.mapIconTexture[0])
 			{
 				Size = new Vector2(20),
-				HAlign = 1f
+				HAlign = 1f,
+				HoverText = Language.GetText("Mods.Teleportation.UI.ShowOnMap")
 			};
-			buttomShowOnMap.GetHoverText += () => "Show on map";
 			Append(buttomShowOnMap);
+			// todo: texture needs to be dynamic
+			UITexture textureConnection = new UITexture(Outbound ? Teleportation.textureRestock : Inbound ? Teleportation.textureDepositAll : null, ScaleMode.Stretch)
+			{
+				Size = new Vector2(20),
+				HAlign = 1,
+				VAlign = 1,
+				Rotation = Outbound ? 90 : 0
+			};
+			textureConnection.GetHoverText += () => Outbound ? Language.GetTextValue("Mods.Teleportation.UI.OutboundConnection") : Inbound ? Language.GetTextValue("Mods.Teleportation.UI.InboundConnection") : "";
+			Append(textureConnection);
 		}
 
 		public override void Click(UIMouseEvent evt)
