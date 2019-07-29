@@ -16,7 +16,7 @@ namespace Teleportation.UI
 
 		private TeleporterPanel panel;
 
-		public bool Selected => panel.SelectedDestination == teleporter;
+		public bool Selected => panel.SelectedTeleporter == teleporter;
 
 		public UIGrid<UITeleporterItem> Grid { get; set; }
 
@@ -67,7 +67,7 @@ namespace Teleportation.UI
 		{
 			if (evt.Target == buttomShowOnMap) return;
 
-			panel.SelectedDestination = Selected ? null : teleporter;
+			panel.SelectedTeleporter = Selected ? null : teleporter;
 		}
 
 		public override void PreDraw(SpriteBatch spriteBatch)

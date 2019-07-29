@@ -20,11 +20,10 @@ namespace Teleportation.TileEntities
 {
 	// note: apperently teleporting NPCs should be more expensive
 
-	// note: multiple inbounds connections, can't connect to them
-
 	public abstract class Teleporter : BaseTE, IHasUI, IItemHandler
 	{
 		protected virtual Rectangle Hitbox => new Rectangle(Position.X * 16 + 8, Position.Y * 16 - 8, 32, 8);
+		protected abstract int TeleportationDelay { get; }
 
 		public LegacySoundStyle CloseSound => SoundID.Item1;
 
@@ -36,6 +35,7 @@ namespace Teleportation.TileEntities
 
 		public ItemHandler Handler { get; }
 
+		private int timer;
 		private Texture2D _entityTexture;
 		private Point16 _destination;
 		private string IconPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{DisplayName.Value} {UUID}.png";
@@ -86,10 +86,12 @@ namespace Teleportation.TileEntities
 				foreach (TeleporterPanel teleporterPanel in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements.OfType<TeleporterPanel>()) teleporterPanel.UpdateGrid();
 			}
 		}
-
+		
 		public override void Update()
 		{
 			if (Destination == null || Handler.Items[0].IsAir) return;
+			if (++timer < TeleportationDelay) return;
+			timer = 0;
 
 			bool teleported = false;
 
@@ -269,6 +271,8 @@ namespace Teleportation.TileEntities
 	{
 		public override Type TileType => typeof(Tiles.BasicTeleporter);
 
+		protected override int TeleportationDelay => 60;
+
 		public override bool ConsumeFuel(int type) => Handler.Shrink(0, type > 0 ? 1 : 5);
 
 		public override IEnumerable<Teleporter> GetConnections()
@@ -284,6 +288,8 @@ namespace Teleportation.TileEntities
 	{
 		public override Type TileType => typeof(Tiles.AdvancedTeleporter);
 
+		protected override int TeleportationDelay => 30;
+		
 		public override bool ConsumeFuel(int type)
 		{
 			if (type == 0) return Handler.Shrink(0, 3);
@@ -303,6 +309,8 @@ namespace Teleportation.TileEntities
 	{
 		public override Type TileType => typeof(Tiles.EliteTeleporter);
 
+		protected override int TeleportationDelay => 15;
+		
 		public override bool ConsumeFuel(int type)
 		{
 			if (type == 0) return Handler.Shrink(0, 1);
@@ -323,7 +331,9 @@ namespace Teleportation.TileEntities
 		public override Type TileType => typeof(Tiles.UltimateTeleporter);
 
 		protected override Rectangle Hitbox => new Rectangle(Position.X * 16 + 8, Position.Y * 16 - 8, 96, 8);
-
+		
+		protected override int TeleportationDelay => 6;
+		
 		public override bool ConsumeFuel(int type)
 		{
 			if (type == 0) return !Main.rand.NextBool(3) || Handler.Shrink(0, 1);

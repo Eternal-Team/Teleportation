@@ -1,11 +1,18 @@
-ItemName.Teleporter=Teleporter
+ItemName.BasicTeleporter=Basic Teleporter
+ItemName.AdvancedTeleporter=Advanced Teleporter
+ItemName.EliteTeleporter=Elite Teleporter
+ItemName.UltimateTeleporter=Ultimate Teleporter
+
 ItemName.Pipette=Pipette
 ItemName.FuelCell=Fuel Cell
 
 ItemTooltip.Teleporter=Beam me up, Scotty!
 ItemTooltip.Pipette=Used to pick icons from items, NPCs, projectiles
 
-MapObject.Teleporter=Teleporter
+MapObject.BasicTeleporter=Basic Teleporter
+MapObject.AdvancedTeleporter=Advanced Teleporter
+MapObject.EliteTeleporter=Elite Teleporter
+MapObject.UltimateTeleporter=Ultimate Teleporter
 
 UI.SetIcon=Click with a [item:{0}] to set icon
 UI.DialOnce=Dial Once
