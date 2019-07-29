@@ -207,16 +207,14 @@ namespace Teleportation.Tiles
 			AddMapEntry(Color.Cyan, name);
 		}
 
-		// todo: fix the beam effect
-
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)
 		{
 			TileEntities.Teleporter teleporter = Utility.GetTileEntity<TileEntities.Teleporter>(i, j);
 			if (teleporter == null || !Main.tile[i, j].IsTopLeft() || !teleporter.Active) return true;
 
-			Vector2 position = new Point16(i + 1, j).ToScreenCoordinates();
+			Vector2 position = new Point16(i, j).ToScreenCoordinates();
 
-			spriteBatch.Draw(Teleportation.teleporterEffect, position + new Vector2(8, 2), null, Color.White * 0.75f, 0f, new Vector2(10, 100), new Vector2(2, 1), SpriteEffects.None, 0f);
+			spriteBatch.Draw(Teleportation.teleporterEffect, position + new Vector2(56, 2), null, Color.White * 0.75f, 0f, new Vector2(10, 100), new Vector2(5.333f, 2), SpriteEffects.None, 0f);
 
 			return true;
 		}
