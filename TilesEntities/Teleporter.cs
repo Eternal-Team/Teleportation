@@ -20,7 +20,6 @@ namespace Teleportation.TileEntities
 {
 	// note: apperently teleporting NPCs should be more expensive
 
-	// note: should you be able to terminate connection from both dialer and destination?
 	// note: multiple inbounds connections, can't connect to them
 
 	public abstract class Teleporter : BaseTE, IHasUI, IItemHandler
@@ -42,6 +41,7 @@ namespace Teleportation.TileEntities
 		public BaseLibrary.Ref<string> DisplayName;
 
 		private Point16 _destination;
+
 		public Teleporter Destination
 		{
 			get
@@ -102,7 +102,8 @@ namespace Teleportation.TileEntities
 						player.Teleport(new Vector2(Destination.Hitbox.Center.X - player.width * 0.5f, Destination.Hitbox.Bottom - player.height));
 						NetMessage.SendData(MessageID.Teleport, -1, -1, null, 0, player.whoAmI, player.position.X, player.position.Y);
 
-						// todo: gets run on server, need to send a message to close the UI
+						if (Main.netMode == NetmodeID.SinglePlayer) BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(this);
+						else Net.SendCloseUI(this, player.whoAmI);
 
 						teleported = true;
 					}
@@ -164,7 +165,7 @@ namespace Teleportation.TileEntities
 					{
 						if (!ConsumeFuel(4)) break;
 
-						npc.Teleport(new Vector2(Destination.Hitbox.Center.X - npc.width * 0.5f, Destination.Hitbox.Bottom- npc.height));
+						npc.Teleport(new Vector2(Destination.Hitbox.Center.X - npc.width * 0.5f, Destination.Hitbox.Bottom - npc.height));
 
 						teleported = true;
 					}
@@ -323,7 +324,7 @@ namespace Teleportation.TileEntities
 		public override Type TileType => typeof(Tiles.UltimateTeleporter);
 
 		protected override Rectangle Hitbox => new Rectangle(Position.X * 16 + 8, Position.Y * 16 - 8, 96, 8);
-		
+
 		public override bool ConsumeFuel(int type)
 		{
 			if (type == 0) return !Main.rand.NextBool(3) || Handler.Shrink(0, 1);

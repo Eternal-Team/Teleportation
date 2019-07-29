@@ -1,4 +1,5 @@
 ﻿using BaseLibrary;
+using BaseLibrary.UI;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 using Teleportation.TileEntities;
@@ -19,7 +20,8 @@ namespace Teleportation
 			SyncTeleporterName,
 			SyncTeleporterDestination,
 			SyncTeleporterIcon,
-			SyncTeleporterWhitelist
+			SyncTeleporterWhitelist,
+			CloseUI
 		}
 
 		internal static ModPacket GetPacket(PacketType packetType)
@@ -49,6 +51,9 @@ namespace Teleportation
 					break;
 				case PacketType.SyncTeleporterWhitelist:
 					ReceiveTeleporterWhitelist(reader, whoAmI);
+					break;
+				case PacketType.CloseUI:
+					ReceiveCloseUI(reader, whoAmI);
 					break;
 			}
 		}
@@ -158,6 +163,20 @@ namespace Teleportation
 			}
 
 			if (Main.netMode == NetmodeID.Server) SendTeleporterWhitelist(teleporter, whoAmI);
+		}
+
+		internal static void SendCloseUI(Teleporter teleporter, int client)
+		{
+			if (Main.netMode != NetmodeID.Server) return;
+
+			ModPacket packet = GetPacket(PacketType.CloseUI);
+			packet.Write(teleporter.Position);
+			packet.Send(client);
+		}
+
+		private static void ReceiveCloseUI(BinaryReader reader, int whoAmI)
+		{
+			BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI((IHasUI)TileEntity.ByPosition[reader.ReadPoint16()]);
 		}
 	}
 }
