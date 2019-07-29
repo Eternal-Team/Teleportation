@@ -25,7 +25,7 @@ namespace Teleportation.UI
 
 		private UIToggleButton[] buttonsWhitelist;
 
-		public Teleporter SelectedDestination;
+		public Teleporter SelectedTeleporter;
 
 		public override void OnInitialize()
 		{
@@ -35,8 +35,6 @@ namespace Teleportation.UI
 
 			UITextInput inputName = new UITextInput(ref Container.DisplayName)
 			{
-				Width = (Container.DisplayName.ToString().Measure(Utility.Font).X, 0),
-				Height = (20, 0),
 				HAlign = 0.5f,
 				MaxLength = 24,
 				RenderPanel = false,
@@ -68,6 +66,7 @@ namespace Teleportation.UI
 			buttonOptions.OnClick += (evt, element) =>
 			{
 				RemoveChild(currentPanel);
+				SelectedTeleporter = null;
 				currentPanel = currentPanel == panelSettings ? panelMain : panelSettings;
 				Append(currentPanel);
 			};
@@ -130,9 +129,13 @@ namespace Teleportation.UI
 			};
 			buttonDialOnce.OnClick += (evt, element) =>
 			{
-				Container.Destination = SelectedDestination;
-				Container.DialOnce = true;
-				Net.SendTeleporterDestination(Container);
+				if (SelectedTeleporter.Destination == Container) SelectedTeleporter = null;
+				else
+				{
+					Container.Destination = SelectedTeleporter;
+					Container.DialOnce = true;
+					Net.SendTeleporterDestination(Container);
+				}
 			};
 			panelMain.Append(buttonDialOnce);
 
@@ -145,9 +148,13 @@ namespace Teleportation.UI
 			};
 			buttonDial.OnClick += (evt, element) =>
 			{
-				Container.Destination = SelectedDestination;
-				Container.DialOnce = false;
-				Net.SendTeleporterDestination(Container);
+				if (SelectedTeleporter.Destination == Container) SelectedTeleporter = null;
+				else
+				{
+					Container.Destination = SelectedTeleporter;
+					Container.DialOnce = false;
+					Net.SendTeleporterDestination(Container);
+				}
 			};
 			panelMain.Append(buttonDial);
 
@@ -160,7 +167,8 @@ namespace Teleportation.UI
 			};
 			buttonInterrupt.OnClick += (evt, element) =>
 			{
-				SelectedDestination = null;
+				SelectedTeleporter.Destination = null;
+				SelectedTeleporter = null;
 				Container.Destination = null;
 				Container.DialOnce = false;
 				Net.SendTeleporterDestination(Container);
@@ -196,6 +204,7 @@ namespace Teleportation.UI
 
 			buttonsWhitelist = new UIToggleButton[Container is UltimateTeleporter ? 5 : 4];
 
+			// todo: forloopify this
 			buttonsWhitelist[0] = new UIToggleButton(Teleportation.whitelistPlayer, ScaleMode.Zoom)
 			{
 				Size = new Vector2(40),
@@ -289,7 +298,7 @@ namespace Teleportation.UI
 				Size = new Vector2(40),
 				Top = (112, 0),
 				Padding = (6, 6, 6, 6),
-				HoverText = Language.GetTextValue("Mods.Teleportation.UI.SetIcon", Teleportation.Instance.ItemType<Pipette>())
+				HoverText = Language.GetText("Mods.Teleportation.UI.SetIcon").Format(Teleportation.Instance.ItemType<Pipette>())
 			};
 			buttonIcon.OnClick += (evt, element) =>
 			{
