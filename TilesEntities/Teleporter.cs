@@ -37,10 +37,14 @@ namespace Teleportation.TileEntities
 		public ItemHandler Handler { get; }
 
 		private Texture2D _entityTexture;
+		private Point16 _destination;
+		private string IconPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{DisplayName.Value} {UUID}.png";
+		private string MetadataPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{DisplayName.Value} {UUID}.txt";
 
 		public BaseLibrary.Ref<string> DisplayName;
-
-		private Point16 _destination;
+		public bool[] Whitelist;
+		public bool DialOnce;
+		public DrawAnimation EntityAnimation;
 
 		public Teleporter Destination
 		{
@@ -51,16 +55,14 @@ namespace Teleportation.TileEntities
 			}
 			set => _destination = value?.Position ?? Point16.NegativeOne;
 		}
-
-		public bool[] Whitelist;
-		public bool DialOnce;
-		public DrawAnimation EntityAnimation;
-
+		
 		public Texture2D EntityTexture
 		{
 			get => _entityTexture ?? (_entityTexture = Main.itemTexture[mod.ItemType(TileType.Name)]);
 			set => _entityTexture = value;
 		}
+
+		public bool Active => Destination != null || ByPosition.Values.OfType<Teleporter>().Any(te => te.Destination == this);
 
 		public Teleporter()
 		{
@@ -179,10 +181,7 @@ namespace Teleportation.TileEntities
 				Net.SendTeleporterDestination(this);
 			}
 		}
-
-		private string IconPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{DisplayName.Value} {UUID}.png";
-		private string MetadataPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{DisplayName.Value} {UUID}.txt";
-
+		
 		public override TagCompound Save()
 		{
 			Directory.CreateDirectory($"{Main.SavePath}/Worlds/{Main.worldName}");

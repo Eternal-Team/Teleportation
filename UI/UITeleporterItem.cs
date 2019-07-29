@@ -21,9 +21,11 @@ namespace Teleportation.UI
 		public UIGrid<UITeleporterItem> Grid { get; set; }
 
 		private UIButton buttomShowOnMap;
+		private UITexture textureConnection;
 
 		private bool Outbound => panel.Container.Destination == teleporter;
 		private bool Inbound => teleporter.Destination == panel.Container;
+		private Texture2D Texture => Outbound ? Teleportation.textureRestock : Inbound ? Teleportation.textureDepositAll : null;
 
 		public UITeleporterItem(Teleporter teleporter, TeleporterPanel panel)
 		{
@@ -50,13 +52,12 @@ namespace Teleportation.UI
 				HoverText = Language.GetText("Mods.Teleportation.UI.ShowOnMap")
 			};
 			Append(buttomShowOnMap);
-			// todo: texture needs to be dynamic
-			UITexture textureConnection = new UITexture(Outbound ? Teleportation.textureRestock : Inbound ? Teleportation.textureDepositAll : null, ScaleMode.Stretch)
+
+			textureConnection = new UITexture(null, ScaleMode.Stretch)
 			{
 				Size = new Vector2(20),
 				HAlign = 1,
-				VAlign = 1,
-				Rotation = Outbound ? 90 : 0
+				VAlign = 1
 			};
 			textureConnection.GetHoverText += () => Outbound ? Language.GetTextValue("Mods.Teleportation.UI.OutboundConnection") : Inbound ? Language.GetTextValue("Mods.Teleportation.UI.InboundConnection") : "";
 			Append(textureConnection);
@@ -71,6 +72,8 @@ namespace Teleportation.UI
 
 		public override void PreDraw(SpriteBatch spriteBatch)
 		{
+			textureConnection.texture = Texture;
+			textureConnection.Rotation = Outbound ? 90 : 0;
 			BackgroundColor = IsMouseHovering ? Utility.ColorPanel_Hovered : Selected ? Utility.ColorPanel_Selected : Utility.ColorPanel;
 		}
 	}

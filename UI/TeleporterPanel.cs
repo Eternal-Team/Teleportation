@@ -29,8 +29,6 @@ namespace Teleportation.UI
 
 		public override void OnInitialize()
 		{
-			SelectedDestination = Container.Destination;
-
 			Width = (0, 0.2f);
 			Height = (0, 0.35f);
 			this.Center();
@@ -89,6 +87,96 @@ namespace Teleportation.UI
 			RemoveChild(currentPanel);
 			currentPanel = panelMain;
 			Append(currentPanel);
+		}
+
+		private void SetupMainPanel()
+		{
+			panelMain = new BaseElement
+			{
+				Width = (0, 1),
+				Height = (-28, 1),
+				Top = (28, 0)
+			};
+
+			UIPanel panelLocations = new UIPanel
+			{
+				Width = (0, 1),
+				Height = (-48, 1)
+			};
+			panelMain.Append(panelLocations);
+
+			gridLocations = new UIGrid<UITeleporterItem>
+			{
+				Width = (-28, 1),
+				Height = (0, 1)
+			};
+			panelLocations.Append(gridLocations);
+			UpdateGrid();
+
+			UIScrollbar scrollbarLocations = new UIScrollbar
+			{
+				Height = (-16, 1),
+				Top = (8, 0),
+				HAlign = 1
+			};
+			gridLocations.SetScrollbar(scrollbarLocations);
+			panelLocations.Append(scrollbarLocations);
+
+			UITextButton buttonDialOnce = new UITextButton(Language.GetText("Mods.Teleportation.UI.DialOnce"))
+			{
+				Width = (-4, 0.25f),
+				Height = (40, 0),
+				VAlign = 1f
+			};
+			buttonDialOnce.OnClick += (evt, element) =>
+			{
+				Container.Destination = SelectedDestination;
+				Container.DialOnce = true;
+				Net.SendTeleporterDestination(Container);
+			};
+			panelMain.Append(buttonDialOnce);
+
+			UITextButton buttonDial = new UITextButton(Language.GetText("Mods.Teleportation.UI.Dial"))
+			{
+				Width = (-4, 0.25f),
+				Height = (40, 0),
+				VAlign = 1f,
+				HAlign = 1 / 3f
+			};
+			buttonDial.OnClick += (evt, element) =>
+			{
+				Container.Destination = SelectedDestination;
+				Container.DialOnce = false;
+				Net.SendTeleporterDestination(Container);
+			};
+			panelMain.Append(buttonDial);
+
+			UITextButton buttonInterrupt = new UITextButton(Language.GetText("Mods.Teleportation.UI.Interrupt"))
+			{
+				Width = (-4, 0.25f),
+				Height = (40, 0),
+				HAlign = 2 / 3f,
+				VAlign = 1f
+			};
+			buttonInterrupt.OnClick += (evt, element) =>
+			{
+				SelectedDestination = null;
+				Container.Destination = null;
+				Container.DialOnce = false;
+				Net.SendTeleporterDestination(Container);
+			};
+			panelMain.Append(buttonInterrupt);
+
+			UIContainerSlot slotFuel = new UIContainerSlot(() => Container.Handler)
+			{
+				Width = (-4, 0.25f),
+				HAlign = 1f,
+				VAlign = 1f,
+				Padding = (0, 24, 24, 0),
+				PreviewItem = new Item()
+			};
+			slotFuel.PreviewItem.SetDefaults(Teleportation.Instance.ItemType<FuelCell>());
+			panelMain.Append(slotFuel);
 		}
 
 		private void SetupSettingsPanel()
@@ -216,96 +304,6 @@ namespace Teleportation.UI
 				Main.PlaySound(SoundID.MenuTick);
 			};
 			panelSettings.Append(buttonIcon);
-		}
-
-		private void SetupMainPanel()
-		{
-			panelMain = new BaseElement
-			{
-				Width = (0, 1),
-				Height = (-28, 1),
-				Top = (28, 0)
-			};
-
-			UIPanel panelLocations = new UIPanel
-			{
-				Width = (0, 1),
-				Height = (-48, 1)
-			};
-			panelMain.Append(panelLocations);
-
-			gridLocations = new UIGrid<UITeleporterItem>
-			{
-				Width = (-28, 1),
-				Height = (0, 1)
-			};
-			panelLocations.Append(gridLocations);
-			UpdateGrid();
-
-			UIScrollbar scrollbarLocations = new UIScrollbar
-			{
-				Height = (-16, 1),
-				Top = (8, 0),
-				HAlign = 1
-			};
-			gridLocations.SetScrollbar(scrollbarLocations);
-			panelLocations.Append(scrollbarLocations);
-
-			UITextButton buttonDialOnce = new UITextButton(Language.GetText("Mods.Teleportation.UI.DialOnce"))
-			{
-				Width = (-4, 0.25f),
-				Height = (40, 0),
-				VAlign = 1f
-			};
-			buttonDialOnce.OnClick += (evt, element) =>
-			{
-				Container.Destination = SelectedDestination;
-				Container.DialOnce = true;
-				Net.SendTeleporterDestination(Container);
-			};
-			panelMain.Append(buttonDialOnce);
-
-			UITextButton buttonDial = new UITextButton(Language.GetText("Mods.Teleportation.UI.Dial"))
-			{
-				Width = (-4, 0.25f),
-				Height = (40, 0),
-				VAlign = 1f,
-				HAlign = 1 / 3f
-			};
-			buttonDial.OnClick += (evt, element) =>
-			{
-				Container.Destination = SelectedDestination;
-				Container.DialOnce = false;
-				Net.SendTeleporterDestination(Container);
-			};
-			panelMain.Append(buttonDial);
-
-			UITextButton buttonInterrupt = new UITextButton(Language.GetText("Mods.Teleportation.UI.Interrupt"))
-			{
-				Width = (-4, 0.25f),
-				Height = (40, 0),
-				HAlign = 2 / 3f,
-				VAlign = 1f
-			};
-			buttonInterrupt.OnClick += (evt, element) =>
-			{
-				SelectedDestination = null;
-				Container.Destination = null;
-				Container.DialOnce = false;
-				Net.SendTeleporterDestination(Container);
-			};
-			panelMain.Append(buttonInterrupt);
-
-			UIContainerSlot slotFuel = new UIContainerSlot(() => Container.Handler)
-			{
-				Width = (-4, 0.25f),
-				HAlign = 1f,
-				VAlign = 1f,
-				Padding = (0, 24, 24, 0),
-				PreviewItem = new Item()
-			};
-			slotFuel.PreviewItem.SetDefaults(Teleportation.Instance.ItemType<FuelCell>());
-			panelMain.Append(slotFuel);
 		}
 
 		public void UpdateGrid()

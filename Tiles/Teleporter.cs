@@ -2,6 +2,7 @@
 using BaseLibrary.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Enums;
@@ -29,7 +30,7 @@ namespace Teleportation.Tiles
 			TileObjectData.newTile.Origin = new Point16(0, 0);
 			TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile, 3, 0);
 			TileObjectData.newTile.UsesCustomCanPlace = true;
-			TileObjectData.newTile.CoordinateHeights = new[] {16};
+			TileObjectData.newTile.CoordinateHeights = new[] { 16 };
 			TileObjectData.newTile.CoordinateWidth = 16;
 			TileObjectData.newTile.CoordinatePadding = 2;
 			TileObjectData.addTile(Type);
@@ -42,7 +43,7 @@ namespace Teleportation.Tiles
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)
 		{
 			TileEntities.Teleporter teleporter = Utility.GetTileEntity<TileEntities.Teleporter>(i, j);
-			if (teleporter?.Destination == null || !Main.tile[i, j].IsTopLeft() ) return true;
+			if (teleporter == null || !Main.tile[i, j].IsTopLeft() || !teleporter.Active) return true;
 
 			Vector2 position = new Point16(i + 1, j).ToScreenCoordinates();
 
@@ -56,7 +57,7 @@ namespace Teleportation.Tiles
 			TileEntities.Teleporter teleporter = Utility.GetTileEntity<TileEntities.Teleporter>(i, j);
 			if (teleporter == null) return;
 
-			if (teleporter.Destination != null)
+			if (teleporter.Active)
 			{
 				r = 1.0f;
 				g = 0.863f;
@@ -111,8 +112,7 @@ namespace Teleportation.Tiles
 			if (teleporter == null || !Main.tile[i, j].IsTopLeft()) return;
 
 			Vector2 position = new Point16(i, j).ToScreenCoordinates();
-			// todo: a dark texture when destination is not set and it is not receiving?
-			spriteBatch.Draw(Teleportation.teleporterGlow[0], position + new Vector2(8, 2), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+			spriteBatch.Draw(Teleportation.teleporterGlow[0], position + new Vector2(8, 2), new Rectangle(0, teleporter.Active ? 6 : 0, 32, 6), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
@@ -139,7 +139,7 @@ namespace Teleportation.Tiles
 
 			Vector2 position = new Point16(i, j).ToScreenCoordinates();
 
-			spriteBatch.Draw(Teleportation.teleporterGlow[1], position + new Vector2(8, 2), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+			spriteBatch.Draw(Teleportation.teleporterGlow[1], position + new Vector2(8, 2), new Rectangle(0, teleporter.Active ? 6 : 0, 32, 6), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
@@ -166,7 +166,7 @@ namespace Teleportation.Tiles
 
 			Vector2 position = new Point16(i, j).ToScreenCoordinates();
 
-			spriteBatch.Draw(Teleportation.teleporterGlow[2], position + new Vector2(8, 2), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+			spriteBatch.Draw(Teleportation.teleporterGlow[2], position + new Vector2(8, 2), new Rectangle(0, teleporter.Active ? 6 : 0, 32, 6), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
@@ -196,7 +196,7 @@ namespace Teleportation.Tiles
 			TileObjectData.newTile.Origin = new Point16(0, 1);
 			TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile, 7, 0);
 			TileObjectData.newTile.UsesCustomCanPlace = true;
-			TileObjectData.newTile.CoordinateHeights = new[] {16, 16};
+			TileObjectData.newTile.CoordinateHeights = new[] { 16, 16 };
 			TileObjectData.newTile.CoordinateWidth = 16;
 			TileObjectData.newTile.CoordinatePadding = 2;
 			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TileEntities.UltimateTeleporter>().Hook_AfterPlacement, -1, 0, false);
@@ -212,7 +212,7 @@ namespace Teleportation.Tiles
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)
 		{
 			TileEntities.Teleporter teleporter = Utility.GetTileEntity<TileEntities.Teleporter>(i, j);
-			if (teleporter?.Destination == null || !Main.tile[i, j].IsTopLeft() ) return true;
+			if (teleporter == null || !Main.tile[i, j].IsTopLeft() || !teleporter.Active) return true;
 
 			Vector2 position = new Point16(i + 1, j).ToScreenCoordinates();
 
@@ -228,7 +228,7 @@ namespace Teleportation.Tiles
 
 			Vector2 position = new Point16(i, j).ToScreenCoordinates();
 
-			spriteBatch.Draw(Teleportation.teleporterGlow[3], position + new Vector2(8, 2), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+			spriteBatch.Draw(Teleportation.teleporterGlow[3], position + new Vector2(8, 2), new Rectangle(0, teleporter.Active ? 6 : 0, 96, 6), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
