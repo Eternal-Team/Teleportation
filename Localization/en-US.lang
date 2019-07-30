@@ -22,3 +22,9 @@ UI.Interrupt=Interrupt
 UI.InboundConnection=Inbound Connection
 UI.OutboundConnection=Outbound Connection
 UI.ShowOnMap=Show On Map
+
+UI.Whitelist_0=Players
+UI.Whitelist_1=NPCs
+UI.Whitelist_2=Items
+UI.Whitelist_3=Projectiles
+UI.Whitelist_4=Bosses

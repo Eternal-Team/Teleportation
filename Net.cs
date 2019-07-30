@@ -1,6 +1,5 @@
 ﻿using BaseLibrary;
 using BaseLibrary.UI;
-using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 using Teleportation.TileEntities;
 using Teleportation.UI;
@@ -118,20 +117,15 @@ namespace Teleportation
 
 			ModPacket packet = GetPacket(PacketType.SyncTeleporterIcon);
 			packet.Write(teleporter.ID);
-
-			packet.Write(teleporter.EntityAnimation.TicksPerFrame);
-			packet.Write(teleporter.EntityAnimation.FrameCount);
-
-			teleporter.EntityTexture.SaveAsPng(packet.BaseStream, teleporter.EntityTexture.Width, teleporter.EntityTexture.Height);
-
+			teleporter.Icon.Write(packet);
 			packet.Send(ignoreClient: ignoreClient);
 		}
 
 		private static void ReceiveTeleporterIcon(BinaryReader reader, int whoAmI)
 		{
 			Teleporter teleporter = (Teleporter)TileEntity.ByID[reader.ReadInt32()];
-			teleporter.EntityAnimation = new DrawAnimationVertical(reader.ReadInt32(), reader.ReadInt32());
-			teleporter.EntityTexture = Texture2D.FromStream(Main.graphics.GraphicsDevice, reader.BaseStream);
+
+			teleporter.Icon.Read(reader);
 
 			if (Main.netMode == NetmodeID.Server) SendTeleporterIcon(teleporter, whoAmI);
 		}

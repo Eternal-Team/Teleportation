@@ -25,7 +25,7 @@ namespace Teleportation.Items
 		public override void SetDefaults()
 		{
 			base.SetDefaults();
-			
+
 			item.createTile = mod.TileType<Tiles.BasicTeleporter>();
 		}
 	}

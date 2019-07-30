@@ -15,10 +15,122 @@ using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
+using Terraria.UI;
 
 namespace Teleportation.TileEntities
 {
-	// note: apperently teleporting NPCs should be more expensive
+	public class IconData
+	{
+		public enum Type
+		{
+			Item,
+			NPC,
+			Projectile
+		}
+
+		private Type type;
+		private int id;
+		private string uniqueKey;
+		public DrawAnimationVertical animation;
+
+		public Texture2D Texture
+		{
+			get
+			{
+				switch (type)
+				{
+					case Type.Item:
+						return Main.itemTexture[id];
+					case Type.NPC:
+						return Main.npcTexture[id];
+					case Type.Projectile:
+						return Main.projectileTexture[id];
+				}
+
+				return null;
+			}
+		}
+
+		public IconData()
+		{
+		}
+
+		public IconData(Type type, int id)
+		{
+			this.type = type;
+			this.id = id;
+
+			switch (type)
+			{
+				case Type.Item:
+					uniqueKey = ItemID.GetUniqueKey(id);
+					animation = Main.itemAnimations[id] as DrawAnimationVertical ?? new DrawAnimationVertical(0, 1);
+					break;
+				case Type.NPC:
+					uniqueKey = NPCID.GetUniqueKey(id);
+					animation = new DrawAnimationVertical(5, Main.npcFrameCount[id]);
+					break;
+				case Type.Projectile:
+					uniqueKey = ProjectileID.GetUniqueKey(id);
+					animation = new DrawAnimationVertical(5, Main.projFrames[id]);
+					break;
+			}
+		}
+
+		public TagCompound Save() => new TagCompound
+		{
+			["Type"] = (int)type,
+			["UniqueKey"] = uniqueKey,
+			["TicksPerFrame"] = animation.TicksPerFrame,
+			["FrameCount"] = animation.FrameCount
+		};
+
+		public void Load(TagCompound tag)
+		{
+			type = (Type)tag.Get<int>("Type");
+			uniqueKey = tag.GetString("UniqueKey");
+
+			switch (type)
+			{
+				case Type.Item:
+					id = ItemID.TypeFromUniqueKey(uniqueKey);
+					break;
+				case Type.NPC:
+					id = NPCID.TypeFromUniqueKey(uniqueKey);
+					break;
+				case Type.Projectile:
+					id = ProjectileID.TypeFromUniqueKey(uniqueKey);
+					break;
+			}
+
+			animation = new DrawAnimationVertical(tag.Get<int>("TicksPerFrame"), tag.Get<int>("FrameCount"));
+		}
+
+		public void Write(BinaryWriter writer)
+		{
+			writer.Write((int)type);
+			writer.Write(id);
+			writer.Write(uniqueKey);
+			writer.Write(animation.TicksPerFrame);
+			writer.Write(animation.FrameCount);
+		}
+
+		public void Read(BinaryReader reader)
+		{
+			type = (Type)reader.ReadInt32();
+			id = reader.ReadInt32();
+			uniqueKey = reader.ReadString();
+			animation = new DrawAnimationVertical(reader.ReadInt32(), reader.ReadInt32());
+		}
+
+		public IconData Clone() => new IconData
+		{
+			type = type,
+			id = id,
+			uniqueKey = uniqueKey,
+			animation = new DrawAnimationVertical(animation.TicksPerFrame, animation.FrameCount)
+		};
+	}
 
 	public abstract class Teleporter : BaseTE, IHasUI, IItemHandler
 	{
@@ -36,15 +148,18 @@ namespace Teleportation.TileEntities
 		public ItemHandler Handler { get; }
 
 		private int timer;
-		private Texture2D _entityTexture;
+
 		private Point16 _destination;
-		private string IconPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{DisplayName.Value} {UUID}.png";
-		private string MetadataPath => $"{Main.SavePath}/Worlds/{Main.worldName}/{DisplayName.Value} {UUID}.txt";
 
 		public BaseLibrary.Ref<string> DisplayName;
 		public bool[] Whitelist;
 		public bool DialOnce;
-		public DrawAnimation EntityAnimation;
+
+		public IconData Icon
+		{
+			get => icon ?? (icon = new IconData(IconData.Type.Item, mod.ItemType(TileType.Name)));
+			set => icon = value;
+		}
 
 		public Teleporter Destination
 		{
@@ -55,14 +170,10 @@ namespace Teleportation.TileEntities
 			}
 			set => _destination = value?.Position ?? Point16.NegativeOne;
 		}
-		
-		public Texture2D EntityTexture
-		{
-			get => _entityTexture ?? (_entityTexture = Main.itemTexture[mod.ItemType(TileType.Name)]);
-			set => _entityTexture = value;
-		}
 
 		public bool Active => Destination != null || ByPosition.Values.OfType<Teleporter>().Any(te => te.Destination == this);
+
+		private IconData icon;
 
 		public Teleporter()
 		{
@@ -79,14 +190,12 @@ namespace Teleportation.TileEntities
 
 		public override void OnPlace()
 		{
-			EntityAnimation = new DrawAnimationVertical(0, 1);
-
 			if (Main.netMode != NetmodeID.Server)
 			{
 				foreach (TeleporterPanel teleporterPanel in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements.OfType<TeleporterPanel>()) teleporterPanel.UpdateGrid();
 			}
 		}
-		
+
 		public override void Update()
 		{
 			if (Destination == null || Handler.Items[0].IsAir) return;
@@ -183,23 +292,16 @@ namespace Teleportation.TileEntities
 				Net.SendTeleporterDestination(this);
 			}
 		}
-		
-		public override TagCompound Save()
+
+		public override TagCompound Save() => new TagCompound
 		{
-			Directory.CreateDirectory($"{Main.SavePath}/Worlds/{Main.worldName}");
-
-			using (FileStream stream = File.Open(IconPath, FileMode.Create)) EntityTexture.SaveAsPng(stream, EntityTexture.Width, EntityTexture.Height);
-			File.WriteAllText(MetadataPath, $"{EntityAnimation.TicksPerFrame};{EntityAnimation.FrameCount}");
-
-			return new TagCompound
-			{
-				["DisplayName"] = DisplayName.Value,
-				["Whitelist"] = Whitelist.ToList(),
-				["Destination"] = _destination,
-				["UUID"] = UUID,
-				["Items"] = Handler.Save()
-			};
-		}
+			["DisplayName"] = DisplayName.Value,
+			["Whitelist"] = Whitelist.ToList(),
+			["Destination"] = _destination,
+			["UUID"] = UUID,
+			["Items"] = Handler.Save(),
+			["Icon"] = Icon.Save()
+		};
 
 		public override void Load(TagCompound tag)
 		{
@@ -208,56 +310,44 @@ namespace Teleportation.TileEntities
 			Whitelist = tag.GetList<bool>("Whitelist").ToArray();
 			_destination = tag.Get<Point16>("Destination");
 			Handler.Load(tag.GetCompound("Items"));
-
-			if (File.Exists(IconPath))
-			{
-				// bug: won't work on server because graphicsdevice is null, what I will have to do is distribute the files to clients
-				using (FileStream stream = File.Open(IconPath, FileMode.Open)) EntityTexture = Texture2D.FromStream(Main.graphics.GraphicsDevice, stream);
-			}
-
-			if (File.Exists(MetadataPath))
-			{
-				string[] text = File.ReadAllText(MetadataPath).Split(';');
-				if (int.TryParse(text[0], out int ticksPerFrame) && int.TryParse(text[1], out int frameCount)) EntityAnimation = new DrawAnimationVertical(ticksPerFrame, frameCount);
-			}
-			else EntityAnimation = new DrawAnimationVertical(0, 1);
+			Icon.Load(tag.GetCompound("Icon"));
 		}
 
 		public override void NetSend(BinaryWriter writer, bool lightSend)
 		{
-			Handler.Write(writer);
-
 			writer.Write(UUID);
 			writer.Write(_destination);
 			for (int i = 0; i < Whitelist.Length; i++) writer.Write(Whitelist[i]);
 
-			writer.Write(EntityAnimation.TicksPerFrame);
-			writer.Write(EntityAnimation.FrameCount);
-
-			EntityTexture.SaveAsPng(writer.BaseStream, EntityTexture.Width, EntityTexture.Height);
-
-			writer.Write(Name);
+			writer.Write(DisplayName.Value);
 			writer.Write(DialOnce);
+
+			Handler.Write(writer);
+
+			Icon.Write(writer);
 		}
 
 		public override void NetReceive(BinaryReader reader, bool lightReceive)
 		{
-			Handler.Read(reader);
-
 			UUID = reader.ReadGUID();
 			_destination = reader.ReadPoint16();
 			for (int i = 0; i < Whitelist.Length; i++) Whitelist[i] = reader.ReadBoolean();
 
-			EntityAnimation = new DrawAnimationVertical(reader.ReadInt32(), reader.ReadInt32());
-			EntityTexture = Texture2D.FromStream(Main.graphics.GraphicsDevice, reader.BaseStream);
-
 			DisplayName.Value = reader.ReadString();
 			DialOnce = reader.ReadBoolean();
+
+			Handler.Read(reader);
+
+			Icon.Read(reader);
 		}
 
 		public override void OnKill()
 		{
-			if (File.Exists(IconPath)) File.Delete(IconPath);
+			// todo: needs to get dispatched to clients?
+			foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements)
+			{
+				if (element is TeleporterPanel panel) panel.UpdateGrid();
+			}
 
 			Handler.DropItems(new Rectangle(Position.X * 16, Position.Y * 16, 48, 16));
 		}
@@ -279,7 +369,7 @@ namespace Teleportation.TileEntities
 		{
 			foreach (TileEntity tileEntity in ByID.Values)
 			{
-				if (tileEntity is BasicTeleporter teleporter && teleporter != this && Vector2.DistanceSquared(Position.ToWorldCoordinates(24), teleporter.Position.ToWorldCoordinates(24)) <= 128 * 128 * 256) yield return teleporter;
+				if (tileEntity is BasicTeleporter teleporter && teleporter != this && Vector2.DistanceSquared(Position.ToWorldCoordinates(24), teleporter.Position.ToWorldCoordinates(24)) <= 32 * 32 * 256) yield return teleporter;
 			}
 		}
 	}
@@ -289,7 +379,7 @@ namespace Teleportation.TileEntities
 		public override Type TileType => typeof(Tiles.AdvancedTeleporter);
 
 		protected override int TeleportationDelay => 30;
-		
+
 		public override bool ConsumeFuel(int type)
 		{
 			if (type == 0) return Handler.Shrink(0, 3);
@@ -310,7 +400,7 @@ namespace Teleportation.TileEntities
 		public override Type TileType => typeof(Tiles.EliteTeleporter);
 
 		protected override int TeleportationDelay => 15;
-		
+
 		public override bool ConsumeFuel(int type)
 		{
 			if (type == 0) return Handler.Shrink(0, 1);
@@ -331,9 +421,9 @@ namespace Teleportation.TileEntities
 		public override Type TileType => typeof(Tiles.UltimateTeleporter);
 
 		protected override Rectangle Hitbox => new Rectangle(Position.X * 16 + 8, Position.Y * 16 - 8, 96, 8);
-		
+
 		protected override int TeleportationDelay => 6;
-		
+
 		public override bool ConsumeFuel(int type)
 		{
 			if (type == 0) return !Main.rand.NextBool(3) || Handler.Shrink(0, 1);

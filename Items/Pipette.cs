@@ -4,8 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using Teleportation.TileEntities;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -17,14 +17,12 @@ namespace Teleportation.Items
 
 		public override bool CloneNewInstances => true;
 
-		public Texture2D EntityTexture;
-		public DrawAnimation EntityAnimation;
+		public IconData icon;
 
 		public override ModItem Clone()
 		{
 			Pipette clone = (Pipette)base.Clone();
-			clone.EntityTexture = EntityTexture;
-			clone.EntityAnimation = EntityAnimation;
+			clone.icon = icon?.Clone();
 			return clone;
 		}
 
@@ -47,28 +45,16 @@ namespace Teleportation.Items
 			Entity entity = Main.MouseWorld.GetEntityAtPos();
 			if (entity == null) return false;
 
-			if (entity is Item item)
-			{
-				EntityTexture = Main.itemTexture[item.type];
-				EntityAnimation = Main.itemAnimations[item.type];
-			}
-			else if (entity is NPC npc)
-			{
-				EntityTexture = Main.npcTexture[npc.type];
-				EntityAnimation = new DrawAnimationVertical(5, Main.npcFrameCount[npc.type]);
-			}
-			else if (entity is Projectile projectile)
-			{
-				EntityTexture = Main.projectileTexture[projectile.type];
-				EntityAnimation = new DrawAnimationVertical(5, Main.projFrames[projectile.type]);
-			}
+			if (entity is Item item) icon = new IconData(IconData.Type.Item, item.type);
+			else if (entity is NPC npc) icon = new IconData(IconData.Type.NPC, npc.type);
+			else if (entity is Projectile projectile) icon = new IconData(IconData.Type.Projectile, projectile.type);
 
 			return true;
 		}
 
 		public override void ModifyTooltips(List<TooltipLine> tooltips)
 		{
-			if (EntityTexture != null) tooltips.Add(new TooltipLine(mod, "PipetteInfo", ""));
+			if (icon != null) tooltips.Add(new TooltipLine(mod, "PipetteInfo", ""));
 		}
 
 		public override bool PreDrawTooltipLine(DrawableTooltipLine line, ref int yOffset)
@@ -77,12 +63,16 @@ namespace Teleportation.Items
 			{
 				Main.spriteBatch.DrawPanel(new Rectangle(line.X, line.Y, 56, 56));
 
+				int offset = 0;
 				Main.spriteBatch.Draw(Utility.PointClampState, () =>
 				{
-					EntityAnimation?.Update();
-					Rectangle rectangle = EntityAnimation?.GetFrame(EntityTexture) ?? EntityTexture.Frame();
-					Main.spriteBatch.Draw(EntityTexture, new Vector2(line.X + 28, line.Y + 28), rectangle, Color.White, 0f, rectangle.Size() * 0.5f, Math.Min(40f / rectangle.Width, 40f / rectangle.Height), SpriteEffects.None, 0f);
+					icon.animation.Update();
+					Rectangle rectangle = icon.animation.GetFrame(icon.Texture);
+					float scale = Math.Min(40f / rectangle.Width, 40f / rectangle.Height);
+					Main.spriteBatch.Draw(icon.Texture, new Vector2(line.X + 28, line.Y + 28), rectangle, Color.White, 0f, rectangle.Size() * 0.5f, scale, SpriteEffects.None, 0f);
+					offset += line.Y + 56;
 				});
+				yOffset += offset;
 
 				return false;
 			}

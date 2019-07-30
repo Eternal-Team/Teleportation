@@ -12,13 +12,18 @@ namespace Teleportation.UI
 	public class UIIcon : BaseElement
 	{
 		private Teleporter teleporter;
-		private Texture2D Texture => teleporter.EntityTexture;
-		private DrawAnimation Animation => teleporter.EntityAnimation;
+		private Texture2D Texture => teleporter.Icon.Texture;
+		private DrawAnimation Animation => teleporter.Icon.animation;
 
 		public UIIcon(Teleporter teleporter)
 		{
 			this.teleporter = teleporter;
 			SetPadding(8);
+		}
+
+		public override void Update(GameTime gameTime)
+		{
+			Animation.Update();
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
