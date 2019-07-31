@@ -6,8 +6,6 @@ using Terraria.ModLoader;
 
 namespace Teleportation
 {
-	// todo: minimap/fullscreen map display of teleporters
-
 	public class Teleportation : Mod
 	{
 		internal static Teleportation Instance;
@@ -21,6 +19,8 @@ namespace Teleportation
 		public override void Load()
 		{
 			Instance = this;
+
+			Hooking.Load();
 
 			if (!Main.dedServ)
 			{
