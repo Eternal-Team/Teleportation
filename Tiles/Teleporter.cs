@@ -2,11 +2,13 @@
 using BaseLibrary.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Teleportation.UI;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Enums;
-using Terraria.ModLoader;
+using Terraria.ID;
 using Terraria.ObjectData;
+using Terraria.UI;
 
 namespace Teleportation.Tiles
 {
@@ -34,9 +36,6 @@ namespace Teleportation.Tiles
 			TileObjectData.newTile.CoordinatePadding = 2;
 			TileObjectData.addTile(Type);
 			disableSmartCursor = true;
-
-			ModTranslation name = CreateMapEntryName();
-			AddMapEntry(Color.Cyan, name);
 		}
 
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)
@@ -90,8 +89,17 @@ namespace Teleportation.Tiles
 			TileEntities.Teleporter teleporter = Utility.GetTileEntity<TileEntities.Teleporter>(i, j);
 			if (teleporter != null)
 			{
-				BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(teleporter);
+				if (Main.netMode != NetmodeID.Server) BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(teleporter);
+
 				teleporter.Kill(i, j);
+
+				if (Main.netMode != NetmodeID.Server)
+				{
+					foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.Elements)
+					{
+						if (element is TeleporterPanel panel) panel.UpdateGrid();
+					}
+				}
 			}
 		}
 	}
@@ -201,9 +209,6 @@ namespace Teleportation.Tiles
 			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TileEntities.UltimateTeleporter>().Hook_AfterPlacement, -1, 0, false);
 			TileObjectData.addTile(Type);
 			disableSmartCursor = true;
-
-			ModTranslation name = CreateMapEntryName();
-			AddMapEntry(Color.Cyan, name);
 		}
 
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)

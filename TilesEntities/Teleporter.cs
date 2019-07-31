@@ -190,10 +190,14 @@ namespace Teleportation.TileEntities
 
 		public override void OnPlace()
 		{
-			if (Main.netMode != NetmodeID.Server)
+			if (Main.netMode == NetmodeID.SinglePlayer)
 			{
-				foreach (TeleporterPanel teleporterPanel in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements.OfType<TeleporterPanel>()) teleporterPanel.UpdateGrid();
+				foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.Elements)
+				{
+					if (element is TeleporterPanel panel) panel.UpdateGrid();
+				}
 			}
+			else Net.SendPlaceTeleporter();
 		}
 
 		public override void Update()
@@ -343,11 +347,12 @@ namespace Teleportation.TileEntities
 
 		public override void OnKill()
 		{
-			// todo: needs to get dispatched to clients?
-			foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements)
+			foreach (TileEntity tileEntity in ByPosition.Values)
 			{
-				if (element is TeleporterPanel panel) panel.UpdateGrid();
+				if (tileEntity is Teleporter teleporter && teleporter.Destination == this) teleporter.Destination = null;
 			}
+
+			Net.SendKillTeleporter(this);
 
 			Handler.DropItems(new Rectangle(Position.X * 16, Position.Y * 16, 48, 16));
 		}

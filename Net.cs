@@ -15,12 +15,14 @@ namespace Teleportation
 	{
 		internal enum PacketType : byte
 		{
-			SyncTeleporterItems,
-			SyncTeleporterName,
-			SyncTeleporterDestination,
-			SyncTeleporterIcon,
-			SyncTeleporterWhitelist,
-			CloseUI
+			TeleporterItems,
+			TeleporterName,
+			TeleporterDestination,
+			TeleporterIcon,
+			TeleporterWhitelist,
+			TeleporterKill,
+			CloseUI,
+			TeleporterPlace
 		}
 
 		internal static ModPacket GetPacket(PacketType packetType)
@@ -36,23 +38,29 @@ namespace Teleportation
 
 			switch (packetType)
 			{
-				case PacketType.SyncTeleporterItems:
+				case PacketType.TeleporterItems:
 					ReceiveTeleporterItems(reader, whoAmI);
 					break;
-				case PacketType.SyncTeleporterName:
+				case PacketType.TeleporterName:
 					ReceiveTeleporterName(reader, whoAmI);
 					break;
-				case PacketType.SyncTeleporterDestination:
+				case PacketType.TeleporterDestination:
 					ReceiveTeleporterDestination(reader, whoAmI);
 					break;
-				case PacketType.SyncTeleporterIcon:
+				case PacketType.TeleporterIcon:
 					ReceiveTeleporterIcon(reader, whoAmI);
 					break;
-				case PacketType.SyncTeleporterWhitelist:
+				case PacketType.TeleporterWhitelist:
 					ReceiveTeleporterWhitelist(reader, whoAmI);
 					break;
 				case PacketType.CloseUI:
 					ReceiveCloseUI(reader, whoAmI);
+					break;
+				case PacketType.TeleporterPlace:
+					ReceivePlaceTeleporter(reader, whoAmI);
+					break;
+				case PacketType.TeleporterKill:
+					ReceiveKillTeleporter(reader, whoAmI);
 					break;
 			}
 		}
@@ -61,7 +69,7 @@ namespace Teleportation
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer) return;
 
-			ModPacket packet = GetPacket(PacketType.SyncTeleporterItems);
+			ModPacket packet = GetPacket(PacketType.TeleporterItems);
 			packet.Write(teleporter.ID);
 			teleporter.Handler.Write(packet);
 			packet.Send(ignoreClient: ignoreClient);
@@ -79,7 +87,7 @@ namespace Teleportation
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer) return;
 
-			ModPacket packet = GetPacket(PacketType.SyncTeleporterName);
+			ModPacket packet = GetPacket(PacketType.TeleporterName);
 			packet.Write(teleporter.ID);
 			packet.Write(teleporter.DisplayName.Value);
 			packet.Send(ignoreClient: ignoreClient);
@@ -97,7 +105,7 @@ namespace Teleportation
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer) return;
 
-			ModPacket packet = GetPacket(PacketType.SyncTeleporterName);
+			ModPacket packet = GetPacket(PacketType.TeleporterName);
 			packet.Write(teleporter.ID);
 			packet.Write(teleporter._destination);
 			packet.Send(ignoreClient: ignoreClient);
@@ -115,7 +123,7 @@ namespace Teleportation
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer) return;
 
-			ModPacket packet = GetPacket(PacketType.SyncTeleporterIcon);
+			ModPacket packet = GetPacket(PacketType.TeleporterIcon);
 			packet.Write(teleporter.ID);
 			teleporter.Icon.Write(packet);
 			packet.Send(ignoreClient: ignoreClient);
@@ -134,7 +142,7 @@ namespace Teleportation
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer) return;
 
-			ModPacket packet = GetPacket(PacketType.SyncTeleporterWhitelist);
+			ModPacket packet = GetPacket(PacketType.TeleporterWhitelist);
 			packet.Write(teleporter.ID);
 
 			for (int i = 0; i < teleporter.Whitelist.Length; i++) packet.Write(teleporter.Whitelist[i]);
@@ -150,7 +158,7 @@ namespace Teleportation
 
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.UI.Elements)
+				foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.Elements)
 				{
 					if (element is TeleporterPanel panel && panel.Container == teleporter) panel.UpdateWhitelist();
 				}
@@ -171,6 +179,49 @@ namespace Teleportation
 		private static void ReceiveCloseUI(BinaryReader reader, int whoAmI)
 		{
 			BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI((IHasUI)TileEntity.ByPosition[reader.ReadPoint16()]);
+		}
+
+		internal static void SendPlaceTeleporter(int ignoreClient = -1)
+		{
+			if (Main.netMode == NetmodeID.SinglePlayer) return;
+
+			ModPacket packet = GetPacket(PacketType.TeleporterPlace);
+			packet.Send(ignoreClient: ignoreClient);
+		}
+
+		private static void ReceivePlaceTeleporter(BinaryReader reader, int whoAmI)
+		{
+			if (Main.netMode == NetmodeID.Server) SendPlaceTeleporter(whoAmI);
+			else
+			{
+				foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.Elements)
+				{
+					if (element is TeleporterPanel panel) panel.UpdateGrid();
+				}
+			}
+		}
+
+		internal static void SendKillTeleporter(Teleporter teleporter, int ignoreClient = -1)
+		{
+			if (Main.netMode == NetmodeID.SinglePlayer) return;
+
+			ModPacket packet = GetPacket(PacketType.TeleporterKill);
+			packet.Write(teleporter.Position);
+			packet.Send(ignoreClient: ignoreClient);
+		}
+
+		private static void ReceiveKillTeleporter(BinaryReader reader, int whoAmI)
+		{
+			Teleporter killed = (Teleporter)TileEntity.ByPosition[reader.ReadPoint16()];
+
+			if (Main.netMode == NetmodeID.Server) SendKillTeleporter(killed, whoAmI);
+			else
+			{
+				foreach (TileEntity tileEntity in TileEntity.ByPosition.Values)
+				{
+					if (tileEntity is Teleporter teleporter && teleporter.Destination == killed) teleporter.Destination = null;
+				}
+			}
 		}
 	}
 }
