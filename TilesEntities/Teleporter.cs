@@ -149,7 +149,7 @@ namespace Teleportation.TileEntities
 
 		private int timer;
 
-		private Point16 _destination;
+		public Point16 _destination;
 
 		public BaseLibrary.Ref<string> DisplayName;
 		public bool[] Whitelist;
