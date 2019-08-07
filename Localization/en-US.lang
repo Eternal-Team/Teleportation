@@ -23,3 +23,5 @@ UI.Whitelist_1=NPCs
 UI.Whitelist_2=Items
 UI.Whitelist_3=Projectiles
 UI.Whitelist_4=Bosses
+
+Config.ShowTeleportersOnMap=Show teleporters on minimap

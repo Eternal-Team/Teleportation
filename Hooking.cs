@@ -17,7 +17,7 @@ namespace Teleportation
 		{
 			ILCursor cursor = new ILCursor(il);
 
-			EditMinimapStyle2(ref cursor);
+			if (Teleportation.Instance.GetConfig<TeleportationConfig>().ShowTeleportersOnMap) EditMinimapStyle2(ref cursor);
 
 			EditMinimapStyle1(ref cursor);
 
