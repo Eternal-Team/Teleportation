@@ -8,18 +8,14 @@ namespace Teleportation
 {
 	public class Teleportation : Mod
 	{
-		internal static Teleportation Instance;
-
 		internal static Texture2D teleporterEffect;
 		internal static Texture2D[] teleporterGlow;
 		internal static Texture2D[] whitelist;
-		internal static Texture2D textureDepositAll;
-		internal static Texture2D textureRestock;
+		internal static Texture2D textureInbound;
+		internal static Texture2D textureOutbound;
 
 		public override void Load()
 		{
-			Instance = this;
-
 			Hooking.Load();
 
 			if (!Main.dedServ)
@@ -39,12 +35,12 @@ namespace Teleportation
 				whitelist[3] = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_Projectile");
 				whitelist[4] = ModContent.GetTexture("Teleportation/Textures/UI/Whitelist_Boss");
 
-				textureDepositAll = ModContent.GetTexture("BaseLibrary/Textures/UI/DepositAll");
-				textureRestock = ModContent.GetTexture("BaseLibrary/Textures/UI/Restock");
+				textureInbound = ModContent.GetTexture("BaseLibrary/Textures/UI/DepositAll");
+				textureOutbound = ModContent.GetTexture("BaseLibrary/Textures/UI/QuickStack");
 			}
 		}
 
-		public override void Unload() => Utility.UnloadNullableTypes();
+		public override void Unload() => this.UnloadNullableTypes();
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI) => Net.HandlePacket(reader, whoAmI);
 	}

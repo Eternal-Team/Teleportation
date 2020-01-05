@@ -1,23 +1,21 @@
-﻿using BaseLibrary;
-using BaseLibrary.UI;
-using BaseLibrary.UI.Elements;
+﻿using BaseLibrary.UI.Elements;
+using BaseLibrary.UI.New;
 using ContainerLibrary;
 using Microsoft.Xna.Framework;
 using Teleportation.Items;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
-using Teleporter = Teleportation.TileEntities.Teleporter;
-using UltimateTeleporter = Teleportation.TileEntities.UltimateTeleporter;
+using Terraria.ModLoader;
 
 namespace Teleportation.UI
 {
-	public class TeleporterPanel : BaseUIPanel<Teleporter>, IItemHandlerUI
+	public class TeleporterPanel : BaseUIPanel<TileEntities.Teleporter>, IItemHandlerUI
 	{
 		public ItemHandler Handler => Container.Handler;
-		public string GetTexture(Item item) => Teleportation.Instance.GetItem<Items.Teleporter>().Texture;
+		public string GetTexture(Item item) => ModContent.GetInstance<Teleporter>().Texture;
 
-		public Teleporter SelectedTeleporter;
+		public TileEntities.Teleporter SelectedTeleporter;
 
 		private UIGrid<UITeleporterItem> gridLocations;
 		private UIToggleButton[] buttonsWhitelist;
@@ -25,15 +23,14 @@ namespace Teleportation.UI
 		private BaseElement panelSettings;
 		private BaseElement currentPanel;
 
-		public override void OnInitialize()
+		public TeleporterPanel(TileEntities.Teleporter teleporter) : base(teleporter)
 		{
-			Width = (0, 0.2f);
-			Height = (0, 0.35f);
-			this.Center();
+			Width.Percent = 20;
+			Height.Percent = 35;
 
 			UITextInput inputName = new UITextInput(ref Container.DisplayName)
 			{
-				HAlign = 0.5f,
+				X = { Percent = 50 },
 				MaxLength = 24,
 				RenderPanel = false,
 				HintText = "Teleporter",
@@ -41,87 +38,85 @@ namespace Teleportation.UI
 				SizeToText = true
 			};
 			inputName.OnTextChange += () => Net.SendTeleporterName(Container);
-			Append(inputName);
+			Add(inputName);
 
 			UITextButton buttonClose = new UITextButton("X")
 			{
 				Size = new Vector2(20),
-				Left = (-20, 1),
+				X = { Pixels = -20, Percent = 100 },
 				RenderPanel = false,
-				Padding = (0, 0, 0, 0),
+				Padding = Padding.Zero,
 				HoverText = Language.GetText("Mods.BaseLibrary.UI.Close")
 			};
-			buttonClose.OnClick += (evt, element) => BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(Container);
-			Append(buttonClose);
+			buttonClose.OnClick += args => PanelUI.Instance.CloseUI(Container);
+			Add(buttonClose);
 
 			UITextButton buttonOptions = new UITextButton("O")
 			{
 				Size = new Vector2(20),
 				RenderPanel = false,
-				Padding = (0, 0, 0, 0),
+				Padding = Padding.Zero,
 				HoverText = Language.GetText("Mods.BaseLibrary.UI.Options")
 			};
-			buttonOptions.OnClick += (evt, element) =>
+			buttonOptions.OnClick += args =>
 			{
-				RemoveChild(currentPanel);
+				Remove(currentPanel);
 				SelectedTeleporter = null;
 				currentPanel = currentPanel == panelSettings ? panelMain : panelSettings;
-				Append(currentPanel);
+				Add(currentPanel);
 			};
-			Append(buttonOptions);
+			Add(buttonOptions);
 
 			currentPanel = new BaseElement
 			{
-				Width = (0, 1),
-				Height = (-28, 1),
-				Top = (28, 0)
+				Width = { Percent = 100 },
+				Height = { Pixels = -28, Percent = 100 },
+				Y = { Pixels = 28 }
 			};
-			Append(currentPanel);
 
+			Add(currentPanel);
 			SetupMainPanel();
 			SetupSettingsPanel();
-
-			RemoveChild(currentPanel);
+			Remove(currentPanel);
 			currentPanel = panelMain;
-			Append(currentPanel);
+			Add(currentPanel);
 		}
 
 		private void SetupMainPanel()
 		{
 			panelMain = new BaseElement
 			{
-				Width = (0, 1),
-				Height = (-28, 1),
-				Top = (28, 0)
+				Width = { Percent = 100 },
+				Height = { Pixels = -28, Percent = 100 },
+				Y = { Pixels = 28 }
 			};
 
 			UIPanel panelLocations = new UIPanel
 			{
-				Width = (0, 1),
-				Height = (-48, 1)
+				Width = { Percent = 100 },
+				Height = { Pixels = -48, Percent = 100 }
 			};
-			panelMain.Append(panelLocations);
+			panelMain.Add(panelLocations);
 
 			gridLocations = new UIGrid<UITeleporterItem>
 			{
-				Width = (-28, 1),
-				Height = (0, 1)
+				Width = { Pixels = -28, Percent = 100 },
+				Height = { Percent = 100 }
 			};
-			panelLocations.Append(gridLocations);
+			panelLocations.Add(gridLocations);
 			UpdateGrid();
 
-			gridLocations.scrollbar.Height = (-16, 1);
-			gridLocations.scrollbar.Top = (8, 0);
-			gridLocations.scrollbar.HAlign = 1;
-			panelLocations.Append(gridLocations.scrollbar);
+			gridLocations.scrollbar.Height = new StyleDimension { Percent = 100 };
+			gridLocations.scrollbar.X.Percent = 100;
+			panelLocations.Add(gridLocations.scrollbar);
 
 			UITextButton buttonDialOnce = new UITextButton(Language.GetText("Mods.Teleportation.UI.DialOnce"))
 			{
-				Width = (-4, 0.25f),
-				Height = (40, 0),
-				VAlign = 1f
+				Width = { Pixels = -4, Percent = 25 },
+				Height = { Pixels = 40 },
+				Y = { Percent = 100 }
 			};
-			buttonDialOnce.OnClick += (evt, element) =>
+			buttonDialOnce.OnClick += args =>
 			{
 				if (SelectedTeleporter == null) return;
 
@@ -133,16 +128,16 @@ namespace Teleportation.UI
 					Net.SendTeleporterDestination(Container);
 				}
 			};
-			panelMain.Append(buttonDialOnce);
+			panelMain.Add(buttonDialOnce);
 
 			UITextButton buttonDial = new UITextButton(Language.GetText("Mods.Teleportation.UI.Dial"))
 			{
-				Width = (-4, 0.25f),
-				Height = (40, 0),
-				VAlign = 1f,
-				HAlign = 1 / 3f
+				Width = { Pixels = -4, Percent = 25 },
+				Height = { Pixels = 40 },
+				Y = { Percent = 100 },
+				X = { Percent = 33 }
 			};
-			buttonDial.OnClick += (evt, element) =>
+			buttonDial.OnClick += args =>
 			{
 				if (SelectedTeleporter == null) return;
 
@@ -154,16 +149,16 @@ namespace Teleportation.UI
 					Net.SendTeleporterDestination(Container);
 				}
 			};
-			panelMain.Append(buttonDial);
+			panelMain.Add(buttonDial);
 
 			UITextButton buttonInterrupt = new UITextButton(Language.GetText("Mods.Teleportation.UI.Interrupt"))
 			{
-				Width = (-4, 0.25f),
-				Height = (40, 0),
-				HAlign = 2 / 3f,
-				VAlign = 1f
+				Width = { Pixels = -4, Percent = 25 },
+				Height = { Pixels = 40 },
+				X = { Percent = 50 },
+				Y = { Percent = 100 }
 			};
-			buttonInterrupt.OnClick += (evt, element) =>
+			buttonInterrupt.OnClick += args =>
 			{
 				if (SelectedTeleporter != null) SelectedTeleporter.Destination = null;
 				SelectedTeleporter = null;
@@ -171,70 +166,71 @@ namespace Teleportation.UI
 				Container.DialOnce = false;
 				Net.SendTeleporterDestination(Container);
 			};
-			panelMain.Append(buttonInterrupt);
+			panelMain.Add(buttonInterrupt);
 
 			UIContainerSlot slotFuel = new UIContainerSlot(() => Container.Handler)
 			{
-				Width = (-4, 0.25f),
-				HAlign = 1f,
-				VAlign = 1f,
-				Padding = (0, 24, 24, 0),
+				Width = { Pixels = -4, Percent = 25 },
+				X = { Percent = 100 },
+				Y = { Percent = 100 },
+				Padding = new Padding(0, 24, 24, 0),
 				PreviewItem = new Item()
 			};
-			slotFuel.PreviewItem.SetDefaults(Teleportation.Instance.ItemType<FuelCell>());
-			panelMain.Append(slotFuel);
+			slotFuel.PreviewItem.SetDefaults(ModContent.ItemType<FuelCell>());
+			panelMain.Add(slotFuel);
 		}
 
 		private void SetupSettingsPanel()
 		{
 			panelSettings = new BaseElement
 			{
-				Width = (0, 1),
-				Height = (-28, 1),
-				Top = (28, 0)
+				Width = { Percent = 100 },
+				Height = { Pixels = -28, Percent = 100 },
+				Y = { Pixels = 28 }
 			};
 
 			UIText textWhitelist = new UIText(Language.GetText("Mods.BaseLibrary.UI.Whitelist"))
 			{
-				Top = (8, 0)
+				Y = { Pixels = 8 }
 			};
-			panelSettings.Append(textWhitelist);
+			panelSettings.Add(textWhitelist);
 
-			buttonsWhitelist = new UIToggleButton[Container is UltimateTeleporter ? 5 : 4];
+			buttonsWhitelist = new UIToggleButton[Container is TileEntities.UltimateTeleporter ? 5 : 4];
 			for (int i = 0; i < buttonsWhitelist.Length; i++)
+
 			{
-				buttonsWhitelist[i] = new UIToggleButton(Teleportation.whitelist[i], ScaleMode.Zoom)
+				buttonsWhitelist[i] = new UIToggleButton(Teleportation.whitelist[i], BaseLibrary.UI.ScaleMode.Zoom)
 				{
 					Size = new Vector2(40),
-					Top = (36, 0),
-					Left = (48 * i, 0),
-					Padding = (6, 6, 6, 6),
+					Y = { Pixels = 36 },
+					X = { Pixels = 48 * i },
+					Padding = new Padding(6, 6, 6, 6),
 					Toggled = Container.Whitelist[i],
 					HoverText = Language.GetText($"Mods.Teleportation.UI.Whitelist_{i}")
 				};
 				int pos = i;
-				buttonsWhitelist[i].OnClick += (evt, element) =>
+				buttonsWhitelist[i].OnClick += args =>
 				{
 					Container.Whitelist[pos] = !Container.Whitelist[pos];
 					Net.SendTeleporterWhitelist(Container);
 				};
-				panelSettings.Append(buttonsWhitelist[i]);
+				panelSettings.Add(buttonsWhitelist[i]);
 			}
 
 			UIText textIcon = new UIText(Language.GetText("Mods.BaseLibrary.UI.Icon"))
 			{
-				Top = (84, 0)
+				Y = { Pixels = 84 }
 			};
-			panelSettings.Append(textIcon);
 
+			panelSettings.Add(textIcon);
 			UIIcon buttonIcon = new UIIcon(Container)
 			{
 				Size = new Vector2(40),
-				Top = (112, 0),
-				Padding = (6, 6, 6, 6),
-				HoverText = Language.GetText("Mods.Teleportation.UI.SetIcon").Format(Teleportation.Instance.ItemType<Pipette>())
+				Y = { Pixels = 112 },
+				Padding = new Padding(6, 6, 6, 6),
+				HoverText = Language.GetText("Mods.Teleportation.UI.SetIcon").Format(ModContent.ItemType<Pipette>())
 			};
-			buttonIcon.OnClick += (evt, element) =>
+			buttonIcon.OnClick += args =>
 			{
 				Pipette pipette = (Pipette)Main.mouseItem.modItem;
 				if (pipette?.icon == null) return;
@@ -245,25 +241,25 @@ namespace Teleportation.UI
 
 				Main.PlaySound(SoundID.MenuTick);
 			};
-			panelSettings.Append(buttonIcon);
+			panelSettings.Add(buttonIcon);
 		}
 
 		public void UpdateGrid()
 		{
 			gridLocations.Clear();
 
-			foreach (Teleporter teleporter in Container.GetConnections())
+			foreach (TileEntities.Teleporter teleporter in Container.GetConnections())
 			{
 				UITeleporterItem teleporterItem = new UITeleporterItem(teleporter, this)
 				{
-					Width = (0, 1),
-					Height = (60, 0)
+					Width = { Percent = 100 },
+					Height = { Pixels = 60 }
 				};
 				gridLocations.Add(teleporterItem);
 			}
 		}
 
-		public void UpdateWhitelist()
+		internal void UpdateWhitelist()
 		{
 			for (int i = 0; i < buttonsWhitelist.Length; i++) buttonsWhitelist[i].Toggled = Container.Whitelist[i];
 		}

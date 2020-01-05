@@ -7,6 +7,7 @@ using System;
 using Teleportation.TileEntities;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ModLoader;
 using Terraria.ObjectData;
 
 namespace Teleportation
@@ -17,7 +18,7 @@ namespace Teleportation
 		{
 			ILCursor cursor = new ILCursor(il);
 
-			if (Teleportation.Instance.GetConfig<TeleportationConfig>().ShowTeleportersOnMap) EditMinimapStyle2(ref cursor);
+			if (ModContent.GetInstance<TeleportationConfig>().ShowTeleportersOnMap) EditMinimapStyle2(ref cursor);
 
 			EditMinimapStyle1(ref cursor);
 
@@ -50,7 +51,7 @@ namespace Teleportation
 							position.X += data.Width * 0.5f * mapScale;
 							position.Y += data.Height * mapScale;
 
-							Texture2D texture = Main.itemTexture[Teleportation.Instance.ItemType(teleporter.TileType.Name)];
+							Texture2D texture = Main.itemTexture[ModContent.GetInstance<Teleportation>().ItemType(teleporter.TileType.Name)];
 							Vector2 origin = new Vector2(texture.Width * 0.5f, texture.Height);
 
 							Main.spriteBatch.Draw(texture, position, null, Color.White, 0f, origin, textureScale, SpriteEffects.None, 0f);
@@ -71,18 +72,8 @@ namespace Teleportation
 
 		private static void EditMinimapStyle1(ref ILCursor cursor)
 		{
-			ILLabel label = cursor.DefineLabel();
-
-			if (cursor.TryGotoNext(i => i.MatchBleUn(out _), i => i.MatchLdcR4(1f), i => i.MatchStloc(84)))
+			if (cursor.TryGotoNext(MoveType.AfterLabel, i => i.MatchLdcI4(0), i => i.MatchStloc(85)))
 			{
-				cursor.Remove();
-				cursor.Emit(OpCodes.Ble_Un, label);
-			}
-
-			if (cursor.TryGotoNext(i => i.MatchLdcI4(0), i => i.MatchStloc(85)))
-			{
-				cursor.MarkLabel(label);
-
 				cursor.Emit(OpCodes.Ldloc, 13);
 				cursor.Emit(OpCodes.Ldloc, 14);
 				cursor.Emit(OpCodes.Ldloc, 17);
@@ -116,7 +107,7 @@ namespace Teleportation
 
 							if (position.X > Main.miniMapX + 12 && position.X < Main.miniMapX + Main.miniMapWidth - 16 && position.Y > Main.miniMapY + 10 && position.Y < Main.miniMapY + Main.miniMapHeight - 14)
 							{
-								Texture2D texture = Main.itemTexture[Teleportation.Instance.ItemType(teleporter.TileType.Name)];
+								Texture2D texture = Main.itemTexture[ModContent.GetInstance<Teleportation>().ItemType(teleporter.TileType.Name)];
 								Vector2 origin = new Vector2(texture.Width * 0.5f, texture.Height);
 
 								Main.spriteBatch.Draw(texture, position, null, color, 0f, origin, scale, SpriteEffects.None, 0f);
@@ -164,7 +155,7 @@ namespace Teleportation
 							position.X += data.Width * 0.5f * mapScale;
 							position.Y += data.Height * mapScale;
 
-							Texture2D texture = Main.itemTexture[Teleportation.Instance.ItemType(teleporter.TileType.Name)];
+							Texture2D texture = Main.itemTexture[ModContent.GetInstance<Teleportation>().ItemType(teleporter.TileType.Name)];
 							Main.spriteBatch.Draw(texture, position, null, color, 0f, new Vector2(texture.Width * 0.5f, texture.Height), textureScale, SpriteEffects.None, 0f);
 						}
 					}

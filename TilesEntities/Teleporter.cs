@@ -1,6 +1,6 @@
 ﻿using BaseLibrary;
 using BaseLibrary.Tiles.TileEntites;
-using BaseLibrary.UI;
+using BaseLibrary.UI.New;
 using ContainerLibrary;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,8 +14,8 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using Terraria.UI;
 
 namespace Teleportation.TileEntities
 {
@@ -185,14 +185,14 @@ namespace Teleportation.TileEntities
 
 			Handler = new ItemHandler();
 			Handler.OnContentsChanged += slot => Net.SendTeleporterItems(this);
-			Handler.IsItemValid += (slot, item) => item.type == mod.ItemType<FuelCell>();
+			Handler.IsItemValid += (slot, item) => item.type == ModContent.ItemType<FuelCell>();
 		}
 
 		public override void OnPlace()
 		{
 			if (Main.netMode == NetmodeID.SinglePlayer)
 			{
-				foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.Elements)
+				foreach (BaseElement element in PanelUI.Instance.Children)
 				{
 					if (element is TeleporterPanel panel) panel.UpdateGrid();
 				}
@@ -219,7 +219,7 @@ namespace Teleportation.TileEntities
 						player.Teleport(new Vector2(Destination.Hitbox.Center.X - player.width * 0.5f, Destination.Hitbox.Bottom - player.height));
 						NetMessage.SendData(MessageID.Teleport, -1, -1, null, 0, player.whoAmI, player.position.X, player.position.Y);
 
-						if (Main.netMode == NetmodeID.SinglePlayer) BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(this);
+						if (Main.netMode == NetmodeID.SinglePlayer) PanelUI.Instance.CloseUI(this);
 						else Net.SendCloseUI(this, player.whoAmI);
 
 						teleported = true;

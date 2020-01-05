@@ -7,6 +7,7 @@ namespace Teleportation
 	{
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 
-		[DefaultValue(true), ReloadRequired, Label("$Mods.Teleportation.Config.ShowTeleportersOnMap")] public bool ShowTeleportersOnMap;
+		[DefaultValue(true), ReloadRequired, Label("$Mods.Teleportation.Config.ShowTeleportersOnMap")]
+		public bool ShowTeleportersOnMap;
 	}
 }

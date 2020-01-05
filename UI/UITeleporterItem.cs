@@ -1,12 +1,12 @@
-﻿using BaseLibrary;
-using BaseLibrary.UI;
+﻿using BaseLibrary.Input;
+using BaseLibrary.Input.Mouse;
 using BaseLibrary.UI.Elements;
+using BaseLibrary.UI.New;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.TileEntities;
 using Terraria;
 using Terraria.Localization;
-using Terraria.UI;
 
 namespace Teleportation.UI
 {
@@ -25,7 +25,7 @@ namespace Teleportation.UI
 
 		private bool Outbound => panel.Container.Destination == teleporter;
 		private bool Inbound => teleporter.Destination == panel.Container;
-		private Texture2D Texture => Outbound ? Teleportation.textureRestock : Inbound ? Teleportation.textureDepositAll : null;
+		private Texture2D Texture => Outbound ? Teleportation.textureOutbound : Inbound ? Teleportation.textureInbound : null;
 
 		public UITeleporterItem(Teleporter teleporter, TeleporterPanel panel)
 		{
@@ -34,47 +34,47 @@ namespace Teleportation.UI
 
 			UIIcon icon = new UIIcon(teleporter)
 			{
-				Height = (0, 1),
-				SubstituteWidth = true
+				Height = { Percent = 100 }
+				//SubstituteWidth = true
 			};
-			Append(icon);
+			Add(icon);
 
 			UIText textDisplayName = new UIText(teleporter.DisplayName)
 			{
-				Left = (48, 0)
+				X = { Pixels = 48 }
 			};
-			Append(textDisplayName);
+			Add(textDisplayName);
 
 			buttomShowOnMap = new UIButton(Main.mapIconTexture[0])
 			{
 				Size = new Vector2(20),
-				HAlign = 1f,
+				X = { Percent = 100 },
 				HoverText = Language.GetText("Mods.Teleportation.UI.ShowOnMap")
 			};
-			Append(buttomShowOnMap);
+			Add(buttomShowOnMap);
 
-			textureConnection = new UITexture(null, ScaleMode.Stretch)
+			textureConnection = new UITexture(null, BaseLibrary.UI.ScaleMode.Stretch)
 			{
 				Size = new Vector2(20),
-				HAlign = 1,
-				VAlign = 1
+				X = { Percent = 100 },
+				Y = { Percent = 100 }
 			};
-			textureConnection.GetHoverText += () => Outbound ? Language.GetTextValue("Mods.Teleportation.UI.OutboundConnection") : Inbound ? Language.GetTextValue("Mods.Teleportation.UI.InboundConnection") : "";
-			Append(textureConnection);
+			//textureConnection.GetHoverText += () => Outbound ? Language.GetTextValue("Mods.Teleportation.UI.OutboundConnection") : Inbound ? Language.GetTextValue("Mods.Teleportation.UI.InboundConnection") : "";
+			Add(textureConnection);
 		}
 
-		public override void Click(UIMouseEvent evt)
+		protected override void MouseClick(MouseButtonEventArgs args)
 		{
-			if (evt.Target == buttomShowOnMap) return;
+			if (args.Button != MouseButton.Left) return;
 
 			panel.SelectedTeleporter = Selected ? null : teleporter;
 		}
 
-		public override void PreDraw(SpriteBatch spriteBatch)
-		{
-			textureConnection.texture = Texture;
-			textureConnection.Rotation = Outbound ? 90 : 0;
-			BackgroundColor = IsMouseHovering ? Utility.ColorPanel_Hovered : Selected ? Utility.ColorPanel_Selected : Utility.ColorPanel;
-		}
+		//public override void PreDraw(SpriteBatch spriteBatch)
+		//{
+		//	textureConnection.texture = Texture;
+		//	textureConnection.Rotation = Outbound ? 90 : 0;
+		//	BackgroundColor = IsMouseHovering ? Utility.ColorPanel_Hovered : Selected ? Utility.ColorPanel_Selected : Utility.ColorPanel;
+		//}
 	}
 }

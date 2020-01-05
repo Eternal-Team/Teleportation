@@ -1,5 +1,6 @@
 ﻿using BaseLibrary;
 using BaseLibrary.Tiles;
+using BaseLibrary.UI.New;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.UI;
@@ -7,8 +8,8 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.Enums;
 using Terraria.ID;
+using Terraria.ModLoader;
 using Terraria.ObjectData;
-using Terraria.UI;
 
 namespace Teleportation.Tiles
 {
@@ -76,12 +77,14 @@ namespace Teleportation.Tiles
 			nextSpecialDrawIndex++;
 		}
 
-		public override void RightClick(int i, int j)
+		public override bool NewRightClick(int i, int j)
 		{
 			TileEntities.Teleporter teleporter = Utility.GetTileEntity<TileEntities.Teleporter>(i, j);
-			if (teleporter == null) return;
+			if (teleporter == null) return false;
 
-			BaseLibrary.BaseLibrary.PanelGUI.UI.HandleUI(teleporter);
+			PanelUI.Instance.HandleUI(teleporter);
+
+			return true;
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
@@ -89,13 +92,13 @@ namespace Teleportation.Tiles
 			TileEntities.Teleporter teleporter = Utility.GetTileEntity<TileEntities.Teleporter>(i, j);
 			if (teleporter != null)
 			{
-				if (Main.netMode != NetmodeID.Server) BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(teleporter);
+				PanelUI.Instance.CloseUI(teleporter);
 
 				teleporter.Kill(i, j);
 
 				if (Main.netMode != NetmodeID.Server)
 				{
-					foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.Elements)
+					foreach (BaseElement element in PanelUI.Instance.Children)
 					{
 						if (element is TeleporterPanel panel) panel.UpdateGrid();
 					}
@@ -108,7 +111,7 @@ namespace Teleportation.Tiles
 	{
 		public override void SetDefaults()
 		{
-			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TileEntities.BasicTeleporter>().Hook_AfterPlacement, -1, 0, false);
+			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(ModContent.GetInstance<TileEntities.BasicTeleporter>().Hook_AfterPlacement, -1, 0, false);
 
 			base.SetDefaults();
 		}
@@ -126,7 +129,7 @@ namespace Teleportation.Tiles
 		{
 			base.KillMultiTile(i, j, frameX, frameY);
 
-			Item.NewItem(i * 16, j * 16, 48, 16, mod.ItemType<Items.BasicTeleporter>());
+			Item.NewItem(i * 16, j * 16, 48, 16, ModContent.ItemType<Items.BasicTeleporter>());
 		}
 	}
 
@@ -134,7 +137,7 @@ namespace Teleportation.Tiles
 	{
 		public override void SetDefaults()
 		{
-			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TileEntities.AdvancedTeleporter>().Hook_AfterPlacement, -1, 0, false);
+			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(ModContent.GetInstance<TileEntities.AdvancedTeleporter>().Hook_AfterPlacement, -1, 0, false);
 
 			base.SetDefaults();
 		}
@@ -153,7 +156,7 @@ namespace Teleportation.Tiles
 		{
 			base.KillMultiTile(i, j, frameX, frameY);
 
-			Item.NewItem(i * 16, j * 16, 48, 16, mod.ItemType<Items.AdvancedTeleporter>());
+			Item.NewItem(i * 16, j * 16, 48, 16, ModContent.ItemType<Items.AdvancedTeleporter>());
 		}
 	}
 
@@ -161,7 +164,7 @@ namespace Teleportation.Tiles
 	{
 		public override void SetDefaults()
 		{
-			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TileEntities.EliteTeleporter>().Hook_AfterPlacement, -1, 0, false);
+			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(ModContent.GetInstance<TileEntities.EliteTeleporter>().Hook_AfterPlacement, -1, 0, false);
 
 			base.SetDefaults();
 		}
@@ -180,7 +183,7 @@ namespace Teleportation.Tiles
 		{
 			base.KillMultiTile(i, j, frameX, frameY);
 
-			Item.NewItem(i * 16, j * 16, 48, 16, mod.ItemType<Items.EliteTeleporter>());
+			Item.NewItem(i * 16, j * 16, 48, 16, ModContent.ItemType<Items.EliteTeleporter>());
 		}
 	}
 
@@ -206,7 +209,7 @@ namespace Teleportation.Tiles
 			TileObjectData.newTile.CoordinateHeights = new[] { 16, 16 };
 			TileObjectData.newTile.CoordinateWidth = 16;
 			TileObjectData.newTile.CoordinatePadding = 2;
-			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TileEntities.UltimateTeleporter>().Hook_AfterPlacement, -1, 0, false);
+			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(ModContent.GetInstance<TileEntities.UltimateTeleporter>().Hook_AfterPlacement, -1, 0, false);
 			TileObjectData.addTile(Type);
 			disableSmartCursor = true;
 		}
@@ -237,7 +240,7 @@ namespace Teleportation.Tiles
 		{
 			base.KillMultiTile(i, j, frameX, frameY);
 
-			Item.NewItem(i * 16, j * 16, 112, 32, mod.ItemType<Items.UltimateTeleporter>());
+			Item.NewItem(i * 16, j * 16, 112, 32, ModContent.ItemType<Items.UltimateTeleporter>());
 		}
 	}
 }

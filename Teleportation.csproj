@@ -22,6 +22,6 @@
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec
-      Command="&quot;G:\C#\TerrariaCompiler\Builds\Debug\Binaries\TerrariaCompiler.exe&quot; &quot;$(ProjectDir)\&quot;" />
+      Command="&quot;G:\C#\Terraria\TerrariaCompiler\Builds\Debug\Binaries\TerrariaCompiler.exe&quot; &quot;$(ProjectDir)\&quot;" />
   </Target>
 </Project>

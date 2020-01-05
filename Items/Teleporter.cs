@@ -1,4 +1,5 @@
 ﻿using BaseLibrary.Items;
+using Terraria.ModLoader;
 
 namespace Teleportation.Items
 {
@@ -26,7 +27,7 @@ namespace Teleportation.Items
 		{
 			base.SetDefaults();
 
-			item.createTile = mod.TileType<Tiles.BasicTeleporter>();
+			item.createTile = ModContent.TileType<Tiles.BasicTeleporter>();
 		}
 	}
 
@@ -38,7 +39,7 @@ namespace Teleportation.Items
 		{
 			base.SetDefaults();
 
-			item.createTile = mod.TileType<Tiles.AdvancedTeleporter>();
+			item.createTile = ModContent.TileType<Tiles.AdvancedTeleporter>();
 		}
 	}
 
@@ -50,7 +51,7 @@ namespace Teleportation.Items
 		{
 			base.SetDefaults();
 
-			item.createTile = mod.TileType<Tiles.EliteTeleporter>();
+			item.createTile = ModContent.TileType<Tiles.EliteTeleporter>();
 		}
 	}
 
@@ -62,7 +63,7 @@ namespace Teleportation.Items
 		{
 			base.SetDefaults();
 
-			item.createTile = mod.TileType<Tiles.UltimateTeleporter>();
+			item.createTile = ModContent.TileType<Tiles.UltimateTeleporter>();
 		}
 	}
 }

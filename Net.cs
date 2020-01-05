@@ -1,5 +1,5 @@
 ﻿using BaseLibrary;
-using BaseLibrary.UI;
+using BaseLibrary.UI.New;
 using System.IO;
 using Teleportation.TileEntities;
 using Teleportation.UI;
@@ -7,7 +7,6 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.UI;
 
 namespace Teleportation
 {
@@ -27,7 +26,7 @@ namespace Teleportation
 
 		internal static ModPacket GetPacket(PacketType packetType)
 		{
-			ModPacket packet = Teleportation.Instance.GetPacket();
+			ModPacket packet = ModContent.GetInstance<Teleportation>().GetPacket();
 			packet.Write((byte)packetType);
 			return packet;
 		}
@@ -158,7 +157,7 @@ namespace Teleportation
 
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.Elements)
+				foreach (BaseElement element in PanelUI.Instance.Children)
 				{
 					if (element is TeleporterPanel panel && panel.Container == teleporter) panel.UpdateWhitelist();
 				}
@@ -178,7 +177,7 @@ namespace Teleportation
 
 		private static void ReceiveCloseUI(BinaryReader reader, int whoAmI)
 		{
-			BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI((IHasUI)TileEntity.ByPosition[reader.ReadPoint16()]);
+			PanelUI.Instance.CloseUI((IHasUI)TileEntity.ByPosition[reader.ReadPoint16()]);
 		}
 
 		internal static void SendPlaceTeleporter(int ignoreClient = -1)
@@ -194,7 +193,7 @@ namespace Teleportation
 			if (Main.netMode == NetmodeID.Server) SendPlaceTeleporter(whoAmI);
 			else
 			{
-				foreach (UIElement element in BaseLibrary.BaseLibrary.PanelGUI.Elements)
+				foreach (BaseElement element in PanelUI.Instance.Children)
 				{
 					if (element is TeleporterPanel panel) panel.UpdateGrid();
 				}

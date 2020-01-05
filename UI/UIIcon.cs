@@ -1,5 +1,5 @@
 ﻿using BaseLibrary;
-using BaseLibrary.UI.Elements;
+using BaseLibrary.UI.New;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -18,22 +18,22 @@ namespace Teleportation.UI
 		public UIIcon(Teleporter teleporter)
 		{
 			this.teleporter = teleporter;
-			SetPadding(8);
+			Padding = new Padding(8);
 		}
 
-		public override void Update(GameTime gameTime)
+		protected override void Update(GameTime gameTime)
 		{
 			Animation.Update();
 		}
 
-		protected override void DrawSelf(SpriteBatch spriteBatch)
+		protected override void Draw(SpriteBatch spriteBatch)
 		{
 			spriteBatch.DrawPanel(Dimensions);
 
 			spriteBatch.Draw(Utility.ImmediateState, () =>
 			{
 				Rectangle rectangle = Animation.GetFrame(Texture);
-				spriteBatch.Draw(Texture, Dimensions.Center(), rectangle, Color.White, 0f, rectangle.Size() * 0.5f, Math.Min(InnerDimensions.Width / rectangle.Width, InnerDimensions.Height / rectangle.Height), SpriteEffects.None, 0f);
+				spriteBatch.Draw(Texture, Utility.Center(Dimensions), rectangle, Color.White, 0f, rectangle.Size() * 0.5f, Math.Min(InnerDimensions.Width / rectangle.Width, InnerDimensions.Height / rectangle.Height), SpriteEffects.None, 0f);
 			});
 		}
 	}
