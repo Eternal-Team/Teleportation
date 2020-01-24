@@ -1,6 +1,6 @@
 ﻿using BaseLibrary;
 using BaseLibrary.Tiles;
-using BaseLibrary.UI.New;
+using BaseLibrary.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.UI;

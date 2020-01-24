@@ -1,5 +1,5 @@
 ﻿using BaseLibrary;
-using BaseLibrary.UI.New;
+using BaseLibrary.UI;
 using System.IO;
 using Teleportation.TileEntities;
 using Teleportation.UI;

@@ -1,5 +1,5 @@
-﻿using BaseLibrary.UI.Elements;
-using BaseLibrary.UI.New;
+﻿using BaseLibrary.UI;
+using BaseLibrary.UI.Elements;
 using ContainerLibrary;
 using Microsoft.Xna.Framework;
 using Teleportation.Items;
@@ -199,7 +199,7 @@ namespace Teleportation.UI
 			for (int i = 0; i < buttonsWhitelist.Length; i++)
 
 			{
-				buttonsWhitelist[i] = new UIToggleButton(Teleportation.whitelist[i], BaseLibrary.UI.ScaleMode.Zoom)
+				buttonsWhitelist[i] = new UIToggleButton(Teleportation.whitelist[i], ScaleMode.Zoom)
 				{
 					Size = new Vector2(40),
 					Y = { Pixels = 36 },

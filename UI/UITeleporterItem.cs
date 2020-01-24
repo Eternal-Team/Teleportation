@@ -1,7 +1,7 @@
 ﻿using BaseLibrary.Input;
 using BaseLibrary.Input.Mouse;
+using BaseLibrary.UI;
 using BaseLibrary.UI.Elements;
-using BaseLibrary.UI.New;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Teleportation.TileEntities;
@@ -53,7 +53,7 @@ namespace Teleportation.UI
 			};
 			Add(buttomShowOnMap);
 
-			textureConnection = new UITexture(null, BaseLibrary.UI.ScaleMode.Stretch)
+			textureConnection = new UITexture(null, ScaleMode.Stretch)
 			{
 				Size = new Vector2(20),
 				X = { Percent = 100 },

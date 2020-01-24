@@ -1,6 +1,6 @@
 ﻿using BaseLibrary;
 using BaseLibrary.Tiles.TileEntites;
-using BaseLibrary.UI.New;
+using BaseLibrary.UI;
 using ContainerLibrary;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -184,7 +184,7 @@ namespace Teleportation.TileEntities
 			Whitelist = new[] { true, false, false, false, false };
 
 			Handler = new ItemHandler();
-			Handler.OnContentsChanged += slot => Net.SendTeleporterItems(this);
+			Handler.OnContentsChanged += (slot, user) => Net.SendTeleporterItems(this);
 			Handler.IsItemValid += (slot, item) => item.type == ModContent.ItemType<FuelCell>();
 		}
 
